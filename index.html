@@ -180,7 +180,7 @@ td .src{color:var(--teal);font-size:11.5px}
     <div class="sp-vign"></div>
   </div>
   <canvas id="spCanvas"></canvas>
-  <div class="sp-top"><span>EVOLUTION LOOP // 智能涌现回环</span><span><b>GTE</b> · 通用思考引擎</span></div>
+  <div class="sp-top"><span>EVOLUTION LOOP // 智能涌现回环</span><span>通用思考引擎（盲点扫描）</span></div>
   <div class="sp-meta">
     <div class="sp-step" id="spStep">01 / 06</div>
     <div class="sp-name" id="spName">微尘</div>
@@ -225,7 +225,7 @@ td .src{color:var(--teal);font-size:11.5px}
         <div class="nav-item" data-page="about" onclick="showPage('about')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>整体原理</div>
       </div>
     </nav>
-    <div class="side-foot">反射式动态路由器 · GTE v2</div>
+    <div class="side-foot">反射式动态路由器 · 盲点扫描 v2</div>
   </aside>
   <main class="main">
     <div class="wrap">
@@ -1296,7 +1296,7 @@ function renderReport(R){
   document.getElementById('reportEmpty').style.display='none';
   document.getElementById('reportReal').style.display='block';
   // 存纯文本供复制
-  R._reportText='【GTE 总报告 · '+((STATE.kb||{}).role||'')+'】\n'+
+  R._reportText='【通用思考引擎（盲点扫描）总报告 · '+((STATE.kb||{}).role||'')+'】\n'+
     '— 这是什么：你输入的是「'+(R.inputType||'一段内容')+'」。工具做的是"第三方盲点扫描+矛盾解构"，既不是直接回答你，也不是给你完整方案，而是决策前帮你查漏。\n'+
     '决策灯：'+lampTxt[R.light]+'\n结论：'+R.judge+
     '\n\n目标：\n'+(R.goals.map(g=>'· '+g).join('\n')||'（无）')+
@@ -1388,7 +1388,7 @@ async function callAI(prompt){
     res=await fetch(base+'/chat/completions',{
       method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key}, signal:ctrl.signal,
       body:JSON.stringify({model, messages:[
-        {role:'system',content:'你是「通用思考引擎 GTE」的语义增强层，代号 M(AI) 层3。\n\n【GTE 是什么】GTE 是一台"反射式动态路由器"：挂载知识库(KB)后，按《矛盾论》框架（调查研究→抓主要矛盾→实事求是→矛盾特殊性）对任务做结构化压力测试，输出主矛盾、风险切割、匹配矩阵与决策灯（红/黄/绿）。\n\n【你的角色与边界】你不是做最终结论的人。你是给路由器的"纯规则层"补上的语义理解模块——识别字面否定、讽刺、盲从、近似语义，纠正规则层"关键词命中"的误判（例如"不用看数据"不应被当成正向证据）。你的输出会与规则层的动态常识层(CAMC)合并，再一起进入主矛盾路由。因此：\n1. 务必基于语义而非关键词做判断；\n2. 你只负责"理解"，不负责"下结论"，不要输出决策建议；\n3. negatedDims 必须严格从用户给定的"能力维度清单"的维度名中选择，禁止编造维度名；\n4. 只输出 JSON，不要任何解释文字。'},
+        {role:'system',content:'你是「通用思考引擎（盲点扫描）」的语义增强层，代号 M(AI) 层3。\n\n【GTE 是什么】GTE 是一台"反射式动态路由器"：挂载知识库(KB)后，按《矛盾论》框架（调查研究→抓主要矛盾→实事求是→矛盾特殊性）对任务做结构化压力测试，输出主矛盾、风险切割、匹配矩阵与决策灯（红/黄/绿）。\n\n【你的角色与边界】你不是做最终结论的人。你是给路由器的"纯规则层"补上的语义理解模块——识别字面否定、讽刺、盲从、近似语义，纠正规则层"关键词命中"的误判（例如"不用看数据"不应被当成正向证据）。你的输出会与规则层的动态常识层(CAMC)合并，再一起进入主矛盾路由。因此：\n1. 务必基于语义而非关键词做判断；\n2. 你只负责"理解"，不负责"下结论"，不要输出决策建议；\n3. negatedDims 必须严格从用户给定的"能力维度清单"的维度名中选择，禁止编造维度名；\n4. 只输出 JSON，不要任何解释文字。'},
         {role:'user',content:prompt}], temperature:0.2, response_format:{type:'json_object'}})
     });
   }catch(e){ clearTimeout(timer); throw new Error(e.name==='AbortError'?'AI 请求超时（15s）':('AI 请求失败：'+e.message)); }
@@ -1401,7 +1401,7 @@ function buildAIPrompt(text,kb){
   const dimLines=kb.capDims.map(d=>'  · '+d.name+'（触发词：'+(d.key||'').split('|').filter(Boolean).join('/')+'）').join('\n');
   const envLines=(kb.envTypes||[]).map(e=>'  · '+e.name+'（'+e.kw.join('/')+'）').join('\n')||'  ·（无）';
   const conLines=kb.contradictions.map(c=>'  · '+c.name+'（触发词：'+(c.kw||[]).join('/')+'）').join('\n');
-  return '你是 GTE 的语义增强层。请对下面的任务描述做语义级（而非关键词）理解，纠正字面误判。\n\n'+
+  return '你是「通用思考引擎（盲点扫描）」的语义增强层。请对下面的任务描述做语义级（而非关键词）理解，纠正字面误判。\n\n'+
     '【当前知识库角色】'+kb.role+(kb.intro?(' —— '+kb.intro):'')+'\n\n'+
     '【能力维度清单】（你的 negatedDims 必须严格从下列维度名中选取，禁止编造）：\n'+dimLines+'\n\n'+
     '【环境类型】\n'+envLines+'\n\n'+
