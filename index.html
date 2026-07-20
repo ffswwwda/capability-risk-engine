@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>通用思考引擎 GTE</title>
+<title>通用思考引擎（盲点扫描）</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
 <style>
@@ -29,6 +29,11 @@ a{color:var(--teal)}
 .sidebar{position:fixed;top:0;left:0;width:218px;height:100vh;display:flex;flex-direction:column;padding:22px 14px;background:rgba(10,14,26,.92);backdrop-filter:blur(14px);border-right:1px solid var(--border);z-index:50;overflow-y:auto}
 .sidebar .brand{margin-bottom:24px;padding:4px 8px}
 .nav-list{display:flex;flex-direction:column;gap:4px}
+.nav-search{width:100%;margin:0 0 12px;padding:9px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--glass2);color:var(--t);font-size:13px;font-family:inherit;outline:none;transition:.2s}
+.nav-search::placeholder{color:var(--ts);opacity:.7}
+.nav-search:focus{border-color:#00d4ff;box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+.nav-group[data-hidden="1"]{display:none}
+.nav-item.filtered{display:none}
 .nav-group{margin-top:14px}
 .nav-group:first-child{margin-top:0}
 .nav-group-title{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ts);opacity:.42;font-weight:700;padding:2px 14px 7px}
@@ -195,7 +200,8 @@ td .src{color:var(--teal);font-size:11.5px}
 </div>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 3v18M3 12h18" stroke-linecap="round"/></svg></span>通用思考引擎</div>
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 3v18M3 12h18" stroke-linecap="round"/></svg></span>通用思考引擎（盲点扫描）</div>
+    <input class="nav-search" id="navSearch" type="text" placeholder="搜索板块，如：原理 / 报告 / 知识库" autocomplete="off">
     <nav class="nav-list">
       <div class="nav-group">
         <div class="nav-group-title">工作台</div>
@@ -213,7 +219,7 @@ td .src{color:var(--teal);font-size:11.5px}
         <div class="nav-item" data-page="path" onclick="showPage('path')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v9a4 4 0 0 0 4 4h4"/><circle cx="6" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>运行路径</div>
         <div class="nav-item" data-page="trace" onclick="showPage('trace')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>路由追踪</div>
       </div>
-      <div class="nav-group">
+      <div class="nav-group" data-hidden="1">
         <div class="nav-group-title">原理讲解</div>
         <div class="nav-item" data-page="method" onclick="showPage('method')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M15 9l-2 5-4 2 2-5z"/></svg>方法论</div>
         <div class="nav-item" data-page="about" onclick="showPage('about')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>整体原理</div>
@@ -225,7 +231,7 @@ td .src{color:var(--teal);font-size:11.5px}
     <div class="wrap">
   <!-- ============ 工作台 ============ -->
   <section class="page active" id="page-console">
-    <h1 class="title">通用思考引擎</h1>
+    <h1 class="title">通用思考引擎（盲点扫描）</h1>
     <p class="sub">在你拍板之前，帮你把想法过一遍<span class="hl">盲点扫描</span>。<br>不管你是要<span class="hl">做决定</span>、<span class="hl">写计划</span>、还是<span class="hl">评估一个想法</span>——贴进来，引擎会从多个能力维度逐条检查：<span class="hl">哪里有漏洞</span>、<span class="hl">哪里自相矛盾</span>、<span class="hl">哪些地方你想到了但没想透</span>。它<span class="hl">不替你做决定</span>，而是让你在做决定之前，<strong>看得更清楚</strong>。</p>
 
     <div class="glass">
@@ -1622,6 +1628,40 @@ function showPage(p){
   if(p==='hist'){ renderHistory(); }
   if(p==='report' && STATE.result){ renderReport(STATE.result); }
 }
+
+// 侧边栏搜索：输入时过滤板块；隐藏的「原理讲解」组在匹配标题时也整体出现
+(function(){
+  var box=document.getElementById('navSearch');
+  if(!box) return;
+  var groups=Array.prototype.slice.call(document.querySelectorAll('.nav-group'));
+  function apply(){
+    var q=box.value.trim().toLowerCase();
+    groups.forEach(function(g){
+      var items=Array.prototype.slice.call(g.querySelectorAll('.nav-item'));
+      var titleEl=g.querySelector('.nav-group-title');
+      var title=titleEl?titleEl.textContent.toLowerCase():'';
+      var hidden=g.getAttribute('data-hidden')==='1';
+      if(q===''){
+        g.style.display = hidden ? 'none' : 'block';
+        items.forEach(function(it){ it.classList.remove('filtered'); });
+        return;
+      }
+      if(title.indexOf(q)>=0){ // 命中组标题 → 整组显示（含隐藏的原理讲解）
+        g.style.display='block';
+        items.forEach(function(it){ it.classList.remove('filtered'); });
+        return;
+      }
+      var any=false;
+      items.forEach(function(it){
+        var m=it.textContent.toLowerCase().indexOf(q)>=0;
+        it.classList.toggle('filtered', !m);
+        if(m) any=true;
+      });
+      g.style.display = any ? 'block' : 'none';
+    });
+  }
+  box.addEventListener('input', apply);
+})();
 
 initKB(); initAI();
 </script>
