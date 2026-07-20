@@ -194,6 +194,7 @@ td .src{color:var(--teal);font-size:11.5px}
       <div>还没有运行。请先到「工作台」贴入情况并运行调度引擎。</div>
     </div>
     <div id="boardReal" style="display:none">
+      <div id="aiInsight" style="display:none;padding:9px 13px;border:1px solid var(--teal);border-radius:9px;background:rgba(0,212,255,.08);font-size:13px;color:var(--t);margin-bottom:12px"></div>
       <div class="grid9">
         <div class="card">
           <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2" stroke-linecap="round"/></svg></span>① 结果锚点</h3>
@@ -485,7 +486,7 @@ function analyze(text,kb,aiCtx){
   if(aiCtx&&aiCtx.enabled&&Array.isArray(aiCtx.goals)){ // M(AI) 层3：用语义结果覆盖纯规则分类（修"跟着降被判目标"等语义坑）
     goals.length=0; aiCtx.goals.forEach(g=>goals.push(g));
     if(aiCtx.risks){ risks.must=aiCtx.risks.must||[]; risks.accept=aiCtx.risks.accept||[]; risks.strive=aiCtx.risks.strive||[]; }
-    out.aiUsed=true;
+    out.aiUsed=true; out.aiNotes=aiCtx.notes||'';
   }
   mk('加工',1,'① 结果锚点 · 目标与风险切割','调查研究·先采真实情况',
     '对输入做分句（共 '+sn.length+' 句），逐句判定目标 / 风险归属',
@@ -629,6 +630,9 @@ function tagCls(arr,cls){return arr.length?arr.map(x=>'<span class="tag '+(cls||
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 
 function renderBoard(R){
+  const ai=document.getElementById('aiInsight');
+  if(R.aiUsed){ ai.style.display='block'; ai.innerHTML='<b style="color:var(--teal)">AI 语义层已增强</b>'+(R.aiNotes?'<div style="margin-top:5px;color:var(--ts);font-size:12.5px;line-height:1.5">'+esc(R.aiNotes)+'</div>':''); }
+  else ai.style.display='none';
   document.getElementById('b-goals').innerHTML=
     '<div style="color:var(--t);margin-bottom:8px">目标：</div>'+(R.goals.length?R.goals.map(g=>'<div class="chip">'+esc(g)+'</div>').join(''):'<span class="ts">未识别目标词</span>')+
     '<div style="color:var(--t);margin:12px 0 6px">风险分类：</div>'+
@@ -737,14 +741,20 @@ async function callAI(prompt){
   const cfg=getAIConfig(); if(!cfg.key) throw new Error('未配置 API Key');
   const base=cfg.provider==='deepseek'?'https://api.deepseek.com/v1':(cfg.base||'https://api.openai.com/v1');
   const model=cfg.provider==='deepseek'?'deepseek-chat':(cfg.model||'gpt-4o-mini');
-  const res=await fetch(base+'/chat/completions',{
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},
-    body:JSON.stringify({model, messages:[
-      {role:'system',content:'你是语义分析器。只输出 JSON，不要任何解释。'},
-      {role:'user',content:prompt}], temperature:0.2, response_format:{type:'json_object'}})
-  });
-  if(!res.ok) throw new Error('AI 调用失败 '+res.status);
-  return JSON.parse((await res.json()).choices[0].message.content);
+  const ctrl=new AbortController(); const timer=setTimeout(()=>ctrl.abort(),15000);
+  let res;
+  try{
+    res=await fetch(base+'/chat/completions',{
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key}, signal:ctrl.signal,
+      body:JSON.stringify({model, messages:[
+        {role:'system',content:'你是语义分析器。只输出 JSON，不要任何解释。'},
+        {role:'user',content:prompt}], temperature:0.2, response_format:{type:'json_object'}})
+    });
+  }catch(e){ clearTimeout(timer); throw new Error(e.name==='AbortError'?'AI 请求超时（15s）':('AI 请求失败：'+e.message)); }
+  clearTimeout(timer);
+  if(!res.ok){ let msg='AI 调用失败 '+res.status; try{ const j=await res.json(); if(j.error&&j.error.message) msg=j.error.message; }catch(_){} throw new Error(msg); }
+  let raw; try{ raw=(await res.json()).choices[0].message.content; }catch(_){ throw new Error('AI 返回解析失败'); }
+  try{ return JSON.parse(raw); }catch(_){ const m=raw.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); throw new Error('AI 返回非 JSON'); }
 }
 function buildAIPrompt(text,kb){
   return '分析下面的任务描述，做语义级（而非关键词）的目标/风险/否定识别。\n岗位：'+kb.role+
@@ -838,7 +848,7 @@ async function runEngine(){
   const bar=document.getElementById('genBar'), pct=document.getElementById('genPct'), txt=document.getElementById('genTxt');
   const steps=['评估自身资源能力 → 能力范围','评估环境情况 → 风险状态','能力匹配环境 → 匹配度','结果验证 → 反向修正（MVP 暂留接口）'];
   let i=0;
-  function step(){
+  async function step(){
     txt.textContent=steps[i]; const p=Math.round((i+1)/steps.length*100);
     bar.style.width=p+'%'; pct.textContent=p+'%';
     i++;
