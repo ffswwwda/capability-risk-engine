@@ -53,16 +53,43 @@ h1.title{font-size:26px;font-weight:600;margin:34px 0 6px;background:var(--grad)
 .sub .hl{background:linear-gradient(120deg,#5fd9ff,#b98bff 55%,#ff9ec4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;white-space:nowrap}
 .glass{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:22px 24px;backdrop-filter:blur(8px)}
 
-/* ====== 可收起卡片 ====== */
-.glass-collapsible{overflow:hidden;transition:max-height .35s ease,padding .35s ease}
-.glass-collapsible.collapsed{max-height:52px!important;padding-bottom:0}
-.glass-collapsible .collapsible-body{overflow:hidden;transition:opacity .25s ease,transform .25s ease;margin-top:12px}
+/* ====== 可收起卡片（开关式折叠面板） ====== */
+.glass-collapsible{overflow:hidden;transition:padding .3s ease}
+/* 收起态：紧凑行 */
+.glass-collapsible.collapsed{padding:0!important}
+.glass-collapsible .collapsible-body{transition:opacity .2s ease,margin-top .2s ease;margin-top:16px}
 .glass-collapsible.collapsed .collapsible-body{display:none}
-.kicker-toggle{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;-webkit-user-select:none}
-.kicker-toggle:hover{opacity:.9}
-.kicker-toggle .chev{width:18px;height:18px;flex-shrink:0;transition:transform .3s ease;color:var(--ts);margin-left:auto}
+/* 标题行：固定高度+垂直居中，模拟开关设置项 */
+.kicker-toggle{
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  height:48px;
+  padding:0 16px;
+  margin:-22px -24px 0 -24px; /* 抵消 glass 的 padding，让标题行撑满宽 */
+  border-bottom:1px solid transparent;
+  transition:border-color .2s ease,background .15s ease;
+  user-select:none;-webkit-user-select:none;
+  font-size:14px;
+  font-weight:500;
+  color:var(--fg);
+  letter-spacing:normal;
+  text-transform:none;
+}
+.kicker-toggle:hover{background:rgba(255,255,255,.04);border-bottom-color:var(--border)}
+.glass-collapsible.collapsed .kicker-toggle{
+  border-bottom:none;border-radius:16px;
+  margin:0;padding:0 18px;height:48px;
+}
+.kicker-toggle svg:first-child{width:18px;height:18px;flex-shrink:0;color:var(--teal);opacity:.85}
+.kicker-toggle .chev{
+  width:16px;height:16px;flex-shrink:0;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  color:var(--ts);opacity:.5;margin-left:auto;
+}
 .glass-collapsible.collapsed .chev{transform:rotate(-90deg)}
-.kicker-toggle span{flex:1}
+.kicker-toggle span{flex:1;line-height:1}
 .glass+.glass{margin-top:18px}
 .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
 .kicker svg{width:15px;height:15px}
