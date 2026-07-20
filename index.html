@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通用思考引擎 GTE</title>
+<style>
+:root{
+  --bg:#0a0e1a; --bg2:#0d1224;
+  --glass:rgba(255,255,255,.04); --glass2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.1); --border2:rgba(255,255,255,.16);
+  --t:#e8ecf4; --ts:#9aa3b8; --tp:#fff;
+  --purple:#a855f7; --teal:#00d4ff; --pink:#ff6b9d;
+  --grad:linear-gradient(135deg,#00d4ff,#a855f7,#ff6b9d);
+  --green:#1d9e75; --yellow:#ef9f27; --red:#e24b4a;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--t);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(1200px 600px at 80% -10%,rgba(168,85,247,.12),transparent),radial-gradient(900px 500px at 0% 10%,rgba(0,212,255,.1),transparent),var(--bg)}
+a{color:var(--teal)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+header.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(10,14,26,.72);border-bottom:1px solid var(--border)}
+.nav-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:14px 20px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}
+.brand .logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center}
+.brand .logo svg{width:18px;height:18px}
+.nav-tabs{display:flex;gap:6px;margin-left:auto}
+.tab{padding:8px 16px;border-radius:10px;font-size:13.5px;color:var(--ts);cursor:pointer;border:1px solid transparent;transition:.18s;user-select:none}
+.tab:hover{color:var(--t);background:var(--glass)}
+.tab.active{color:var(--tp);background:var(--glass2);border-color:var(--border2)}
+.page{display:none;animation:fade .3s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+h1.title{font-size:26px;font-weight:600;margin:34px 0 6px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--ts);font-size:14px;margin-bottom:24px;max-width:640px}
+.glass{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:22px 24px;backdrop-filter:blur(8px)}
+.glass+.glass{margin-top:18px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.kicker svg{width:15px;height:15px}
+h2.sec-h{font-size:18px;font-weight:600;margin-bottom:6px}
+.sec-p{color:var(--ts);font-size:13.5px;margin-bottom:16px}
+.btn{padding:13px 22px;border-radius:12px;border:1px solid var(--border2);background:var(--glass2);color:var(--t);font-size:14px;cursor:pointer;font-family:inherit;transition:.18s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{transform:translateY(-2px);border-color:var(--teal);color:var(--tp)}
+.btn-primary{background:var(--grad);border:none;color:#06121f;font-weight:600}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-sec{padding:9px 16px;font-size:13px;border-radius:10px;background:transparent}
+textarea,select,input[type=text]{width:100%;font-family:inherit;font-size:14px;padding:12px 14px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--border);color:var(--t);resize:vertical}
+textarea:focus,select:focus,input:focus{outline:none;border-color:var(--teal)}
+label.lbl{font-size:13px;color:var(--ts);display:block;margin:14px 0 7px}
+.gen-wrap{margin-top:16px;display:none}
+.gen-wrap.show{display:block}
+.gen-bar{height:7px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+.gen-bar>i{display:block;height:100%;width:0;background:var(--grad);transition:width .12s linear}
+.gen-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ts);margin-top:8px}
+.hint{font-size:12.5px;color:var(--yellow);margin-top:10px;min-height:16px}
+.grid9{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card h3{font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.card h3 .ic{width:26px;height:26px;border-radius:8px;background:var(--grad);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.card h3 .ic svg{width:15px;height:15px}
+.card .body{font-size:13px;color:var(--ts)}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;margin:3px 4px 0 0;background:var(--glass2);border:1px solid var(--border)}
+.tag.must{color:#ffb4b4;border-color:rgba(226,75,74,.4);background:rgba(226,75,74,.12)}
+.tag.accept{color:#ffe0a8;border-color:rgba(239,159,39,.4);background:rgba(239,159,39,.1)}
+.tag.strive{color:#a8f0d6;border-color:rgba(29,158,117,.4);background:rgba(29,158,117,.1)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:9px;font-size:12.5px;background:var(--glass2);border:1px solid var(--border);margin:3px 4px 0 0}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.green{background:var(--green)} .dot.yellow{background:var(--yellow)} .dot.red{background:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border)}
+th{color:var(--ts);font-weight:500;font-size:12px}
+td .src{color:var(--teal);font-size:11.5px}
+.light-big{display:flex;align-items:center;gap:14px;padding:18px;border-radius:14px;background:var(--glass2);border:1px solid var(--border)}
+.light-big .lamp{width:42px;height:42px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+.lamp.green{background:rgba(29,158,117,.2);color:#7fe9c4;border:2px solid var(--green)}
+.lamp.yellow{background:rgba(239,159,39,.2);color:#ffd98a;border:2px solid var(--yellow)}
+.lamp.red{background:rgba(226,75,74,.2);color:#ffb0b0;border:2px solid var(--red)}
+.trace-item{border-left:2px solid var(--purple);padding:10px 0 10px 16px;margin-bottom:6px}
+.trace-item .from{font-size:12.5px;color:var(--ts)}
+.trace-item .rule{font-size:13px;color:var(--tp);margin:3px 0}
+.trace-item .hit{font-size:12px;color:var(--teal)}
+.empty{text-align:center;padding:70px 20px;color:var(--ts)}
+.empty svg{width:50px;height:50px;opacity:.35;margin-bottom:14px}
+.note{font-size:12.5px;color:var(--ts);background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.18);border-radius:10px;padding:11px 14px;margin-top:14px}
+.radar-wrap{display:flex;justify-content:center;padding:6px 0}
+.phase-pill{font-size:12px;padding:5px 13px;border-radius:20px;border:1px solid var(--border);display:inline-flex;align-items:center}
+.path-step{border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px;background:var(--glass);position:relative}
+.path-step::before{content:"";position:absolute;left:26px;top:0;bottom:0;width:1px;background:var(--border);z-index:0}
+.path-step:first-child::before{top:26px}
+.path-step:last-child::before{bottom:auto;height:0}
+.path-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;position:relative;z-index:1}
+.path-dot{width:14px;height:14px;border-radius:50%;background:var(--grad);flex:0 0 auto;box-shadow:0 0 0 4px var(--bg)}
+.path-no{font-weight:700;color:var(--tp);font-size:14px}
+.path-name{font-size:14px;color:var(--t);font-weight:500}
+.path-mao{font-size:11.5px;color:var(--teal);border:1px solid rgba(0,212,255,.3);background:rgba(0,212,255,.08);padding:2px 9px;border-radius:20px;margin-left:auto}
+.path-input{font-size:12.5px;color:var(--ts);margin-bottom:10px;padding-left:36px}
+.path-ev{width:100%;border-collapse:collapse;font-size:12.5px;margin-left:36px;max-width:calc(100% - 36px)}
+.path-ev td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+.path-ev .ev-item{color:var(--t);max-width:240px}
+.path-ev .ev-cond{color:var(--ts);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px}
+.ev-ok{color:var(--green);font-weight:600}
+.ev-no{color:var(--ts);opacity:.55}
+.path-out{margin:10px 0 0 36px;font-size:13px;color:var(--tp);background:var(--glass2);border:1px solid var(--border);border-radius:9px;padding:9px 12px}
+.path-out b{color:var(--teal)}
+.switch{position:relative;display:inline-block;width:42px;height:24px;flex:0 0 auto}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.12);border:1px solid var(--border);border-radius:24px;transition:.2s}
+.switch .slider:before{content:"";position:absolute;height:18px;width:18px;left:3px;top:2px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked+.slider{background:var(--grad);border-color:transparent}
+.switch input:checked+.slider:before{transform:translateX(18px)}
+@media(max-width:820px){.grid9{grid-template-columns:1fr}.path-ev .ev-item{max-width:140px}}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="nav-in">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 3v18M3 12h18" stroke-linecap="round"/></svg></span>通用思考引擎</div>
+    <nav class="nav-tabs">
+      <div class="tab active" onclick="showPage('console')">工作台</div>
+      <div class="tab" onclick="showPage('board')">决策看板</div>
+      <div class="tab" onclick="showPage('path')">运行路径</div>
+      <div class="tab" onclick="showPage('trace')">路由追踪</div>
+      <div class="tab" onclick="showPage('method')">方法论</div>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- ============ 工作台 ============ -->
+  <section class="page active" id="page-console">
+    <h1 class="title">通用思考引擎</h1>
+    <p class="sub">一套思考路径，适配所有岗位，只是知识不同。纯规则版（不接 LLM）。加载一个岗位知识库（或粘贴你自己的 JSON），贴入任务描述，引擎按四步循环跑出：主矛盾 · 匹配度 · 决策灯 · 全溯源。</p>
+
+    <div class="glass">
+      <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round"/></svg>STEP 0 · 知识库（可插拔）</div>
+      <label class="lbl">选择内置知识库，或从文件 / 粘贴加载外部</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <select id="kbSel" style="flex:1;min-width:200px"></select>
+        <button class="btn btn-sec" onclick="document.getElementById('kbFile').click()">从文件加载</button>
+        <input type="file" id="kbFile" accept=".json,application/json" style="display:none" onchange="loadKBFile(this)">
+        <button class="btn btn-sec" onclick="togglePaste()">粘贴 JSON</button>
+      </div>
+      <div id="kbPaste" style="display:none;margin-top:12px">
+        <textarea id="kbJson" rows="5" placeholder='{"role":"岗位名","envTypes":[{"name":"环境类型","kw":["关键词"]}],"capDims":[{"name":"能力维度","key":"触发词1|触发词2","baseline":3}],"contradictions":[{"id":"c1","name":"矛盾A vs 矛盾B","kw":["词"],"method":"推荐方法","source":"矛盾论"}],"pathSteps":["步骤1","步骤2"],"judge":{"capThreshold":3.2}}'></textarea>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+          <button class="btn btn-sec" onclick="applyPastedKB()">应用此知识库</button>
+          <span id="kbPasteHint" class="hint"></span>
+        </div>
+      </div>
+      <div id="kbInfo" class="note" style="margin-top:12px"></div>
+
+      <div class="glass" style="margin-top:18px">
+        <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a4 4 0 00-4 4 3 3 0 00-1 5 3 3 0 002 5 4 4 0 006 0 3 3 0 002-5 3 3 0 00-1-5 4 4 0 00-4-4z" stroke-linejoin="round"/><path d="M12 3v18" stroke-linecap="round"/></svg>AI 增强（可选 · 层3 语义分支）</div>
+        <label class="lbl">开启后，AI 读取否定/近似语义，修正纯规则的目标-风险误判。它不新增聊天框，只让路由更准（M(AI) 接入 → 路由内部长出语义分支）。</label>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <label class="switch"><input type="checkbox" id="aiSw"><span class="slider"></span></label>
+          <span class="ts">启用 AI 语义层</span>
+          <select id="aiProvider">
+            <option value="deepseek">DeepSeek（前端直连）</option>
+            <option value="openai">OpenAI 兼容</option>
+          </select>
+        </div>
+        <div id="aiKeyWrap" style="display:none;margin-top:12px">
+          <input type="password" id="aiKey" placeholder="API Key（仅存浏览器 localStorage，绝不进仓库）">
+          <div class="note" style="margin-top:8px">Key 只在你本地浏览器，引擎直连服务商。M(AI) 层只做语义校准，不替代你的知识库，也不读取你的 KB 内容上传（仅把任务描述发给模型做语义分析）。</div>
+        </div>
+      </div>
+
+      <label class="lbl">贴入具体情况 / 任务描述</label>
+      <textarea id="sitInput" rows="7" placeholder="例如：我们要上线一款新品飞机杯，目标是提升品类销量、建立口碑。但目前 VOC 数据只有 200 条，样本偏小。市场竞争激烈属于红海，我们担心表面需求掩盖真实动机。希望先小范围验证再规模落地。"></textarea>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
+        <button class="btn btn-primary" id="runBtn" onclick="runEngine()">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" stroke-linejoin="round"/></svg>
+          运行思考引擎
+        </button>
+        <span id="genHint" class="hint"></span>
+      </div>
+      <div class="gen-wrap" id="genWrap">
+        <div class="gen-bar"><i id="genBar"></i></div>
+        <div class="gen-meta"><span id="genTxt">准备中…</span><span id="genPct">0%</span></div>
+      </div>
+      <div class="note">提示：路由完全由"关键词命中"驱动。你在描述里写的词，决定命中的规则——这正是要验证的部分。改几个词，看结论怎么变。</div>
+    </div>
+  </section>
+
+  <!-- ============ 决策看板 ============ -->
+  <section class="page" id="page-board">
+    <h1 class="title">决策看板 · 9 宫格</h1>
+    <p class="sub">四步循环引擎的输出。每一项都可在「路由追踪」页看到它从哪句话、命中哪条规则来的。</p>
+    <div id="boardEmpty" class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
+      <div>还没有运行。请先到「工作台」贴入情况并运行调度引擎。</div>
+    </div>
+    <div id="boardReal" style="display:none">
+      <div class="grid9">
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2" stroke-linecap="round"/></svg></span>① 结果锚点</h3>
+          <div class="body" id="b-goals"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18" stroke-linecap="round"/></svg></span>② 环境状况</h3>
+          <div class="body" id="b-env"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z" stroke-linejoin="round"/></svg></span>③ 能力范围</h3>
+          <div class="body" id="b-caps"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h8a4 4 0 014 4v6" stroke-linecap="round"/></svg></span>④ 结果路径图</h3>
+          <div class="body" id="b-path"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 3v18M5 8l7-5 7 5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>⑤ 判断原则</h3>
+          <div class="body" id="b-judge"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16" stroke-linecap="round"/></svg></span>⑥ 匹配矩阵</h3>
+          <div class="body" id="b-matrix"></div>
+        </div>
+      </div>
+      <div class="grid9" style="margin-top:16px">
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 2l3 7 7 .5-5.5 4.5 2 7-6.5-4-6.5 4 2-7L2 9.5 9 9z" stroke-linejoin="round"/></svg></span>⑦ 能力雷达</h3>
+          <div class="radar-wrap" id="b-radar"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/></svg></span>⑧ 决策红绿灯</h3>
+          <div class="body" id="b-light"></div>
+        </div>
+        <div class="card">
+          <h3><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M4 12a8 8 0 0114-5M20 12a8 8 0 01-14 5" stroke-linecap="round"/><path d="M18 4v3h-3M6 20v-3h3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>⑨ 反馈闭环</h3>
+          <div class="body" id="b-loop"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 路由追踪 ============ -->
+  <section class="page" id="page-trace">
+    <h1 class="title">路由追踪 · 验证逻辑</h1>
+    <p class="sub">每一条结论都反向追到：原始输入片段 → 触发规则 → 命中关键词。改输入看路由怎么变，就能判断"路由逻辑"对不对。</p>
+    <div id="traceEmpty" class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16M12 4v16" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg>
+      <div>暂无追踪记录。运行引擎后这里会显示完整路由链路。</div>
+    </div>
+    <div id="traceReal" style="display:none">
+      <div class="glass" id="traceList"></div>
+      <div class="note">这就是"具体情况具体分析"的工程表达：引擎不生成结论，它只是按你定义的规则，把输入片段映射到结论。规则透明、可改、可溯源。</div>
+    </div>
+  </section>
+
+  <!-- ============ 运行路径（全透明） ============ -->
+  <section class="page" id="page-path">
+    <h1 class="title">运行路径 · 全透明</h1>
+    <p class="sub">引擎每一步怎么跑，全在这里：输入了什么 → 逐条核对了哪条规则（✓/✗）→ 产出了什么，并标注每一步对应的毛选方法。你可以看着它怎么运营，再决定怎么优化规则。</p>
+    <div id="pathEmpty" class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16M12 4v16" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg>
+      <div>暂无运行路径。运行引擎后这里会显示完整的逐步执行轨迹。</div>
+    </div>
+    <div id="pathReal" style="display:none">
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+        <span class="phase-pill" style="background:rgba(0,212,255,.1);border-color:rgba(0,212,255,.3);color:var(--teal)">知识层 · 加载规则库</span>
+        <span class="phase-pill" style="background:rgba(168,85,247,.1);border-color:rgba(168,85,247,.3);color:var(--purple)">加工层 · 四步循环</span>
+        <span class="phase-pill" style="background:rgba(255,107,157,.1);border-color:rgba(255,107,157,.3);color:var(--pink)">输出层 · 结论+闭环</span>
+      </div>
+      <div id="pathList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 方法论 ============ -->
+  <section class="page" id="page-method">
+    <h1 class="title">方法论 · 毛选技能栈映射</h1>
+    <p class="sub">引擎内核 = 毛选方法论的程序化。下面把六项毛选技能逐行映射到 9 宫格调度层的具体步骤、函数与触发规则。这是「一套思考路径，适配所有岗位」的可操作说明（完整版见 DESIGN.md）。</p>
+
+    <div class="glass">
+      <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round"/></svg>毛选六层技能栈</div>
+      <div class="grid9">
+        <div class="card"><h3><span class="ic">实</span>① 实事求是</h3><div class="body">认识论总纲（《改造我们的学习》）。一切量化基于真实命中，不臆测。引擎标注：<b>实事求是·基于真实数据</b></div></div>
+        <div class="card"><h3><span class="ic">调</span>② 调查研究</h3><div class="body">前提（《反对本本主义》"没有调查没发言权"）。先采真实情况再判断，无矛盾则先补调查。标注：<b>调查研究·先采真实情况</b></div></div>
+        <div class="card"><h3><span class="ic">践</span>③ 实践论</h3><div class="body">认识—实践—再认识闭环（《实践论》）。结论非终点，真实结果回流修正权重。标注：<b>实践论·认识-实践闭环</b></div></div>
+        <div class="card"><h3><span class="ic">析</span>④ 具体情况具体分析</h3><div class="body">矛盾特殊性（《矛盾论》引列宁"活的灵魂"）。贯穿调度层的元原则，不看模板看眼前矛盾质地。最直接体现：矛盾路由 step4</div></div>
+        <div class="card"><h3><span class="ic">抓</span>⑤ 抓主要矛盾</h3><div class="body">重点论（《矛盾论》）。在诸多矛盾中抓决定性 2 条，关键风险一票否决。标注：<b>矛盾论·抓主要矛盾</b></div></div>
+        <div class="card"><h3><span class="ic">群</span>⑥ 群众路线</h3><div class="body">价值闭环（《领导方法的若干问题》）。KB 由岗位人写（从岗位来），输出给岗位人可执行建议（到岗位去）</div></div>
+      </div>
+    </div>
+
+    <div class="glass">
+      <div class="kicker">核心映射 · 毛选技能 → 9 宫格调度层</div>
+      <table>
+        <thead><tr><th>毛选技能</th><th>9宫格落点</th><th>引擎 step</th><th>触发规则（关键词逻辑）</th><th>工程表达</th></tr></thead>
+        <tbody>
+          <tr><td>① 实事求是</td><td>知识层 + ③能力范围 + ⑥匹配矩阵</td><td>0 / 3 / 6</td><td>能力分仅由命中数决定；匹配度=均值/难度×100</td><td>一切量化基于真实命中，不臆测</td></tr>
+          <tr><td>② 调查研究</td><td>①结果锚点 + ②环境状况</td><td>1 / 2</td><td>输入拆句逐判；环境逐类触发词核对</td><td>先采真实情况再判断，无矛盾则先补调查</td></tr>
+          <tr><td>③ 实践论</td><td>⑨反馈闭环</td><td>8</td><td>结论非终点，真实结果回流修正权重</td><td>认识—实践—再认识，接口已留</td></tr>
+          <tr><td>④ 具体情况具体分析</td><td>贯穿调度层；最集中：④矛盾路由 + 路由追踪</td><td>4 + trace</td><td>按岗位特定触发词命中特定矛盾，非套固定结论</td><td>引擎不生成结论，只把输入片段映射到结论</td></tr>
+          <tr><td>⑤ 抓主要矛盾</td><td>④主矛盾路由 + ⑧红绿灯</td><td>4 / 7</td><td>矛盾按命中数排序取前2；有红则红</td><td>抓决定性2条，关键风险一票否决</td></tr>
+          <tr><td>⑥ 群众路线</td><td>整体输出导向 + KB 可插拔</td><td>全周期</td><td>知识库由岗位人写；输出给岗位人可执行建议</td><td>从岗位中来、到岗位中去，价值闭环</td></tr>
+        </tbody>
+      </table>
+      <div class="note">这就是"具体情况具体分析"的工程表达：引擎不生成结论，它只是按你定义的规则，把输入片段映射到结论。规则透明、可改、可溯源。</div>
+    </div>
+
+    <div class="glass">
+      <div class="kicker">重点 · 具体情况具体分析 = 调度层元原则</div>
+      <div class="body" style="color:var(--t)">
+        <p>它不绑定单步，而是贯穿调度层的灵魂——引擎内核不认识任何岗位，只认 KB Schema；换一份知识库，跑出的矛盾与方法完全不同，因为"矛盾是什么质地"由知识库定义，而非引擎硬编码。这就是"不同质的矛盾，只有用不同质的方法才能解决"的程序化表达。</p>
+        <p style="margin-top:10px">三个工程表达：</p>
+        <p>① <b>KB 可插拔</b> = 承认矛盾特殊性（拒绝本本主义套模板）</p>
+        <p>② <b>矛盾路由</b> = 对当前输入做特殊性判定（改几个词，结论就变）</p>
+        <p>③ <b>全透明溯源</b> = 让岗位人自己校验特殊性判定（可改、可溯源）</p>
+      </div>
+      <table style="margin-top:14px">
+        <thead><tr><th>本本主义（反模式）</th><th>具体情况具体分析（本引擎）</th></tr></thead>
+        <tbody>
+          <tr><td>不管什么任务都走同一条 pipeline</td><td>先判定矛盾特殊性，再调度加工路径</td></tr>
+          <tr><td>结论由模板生成</td><td>结论由"输入片段→规则映射"生成</td></tr>
+          <tr><td>规则黑箱、不可改</td><td>规则透明、可改、可溯源</td></tr>
+          <tr><td>引擎硬编码岗位知识</td><td>知识库可插拔，引擎与岗位解耦</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ===================== 知识库（可插拔 · 岗位无关） =====================
+ * 引擎内核只认这个 Schema，不认具体岗位名。
+ * 加新岗位 = 写一份符合 Schema 的 JSON，引擎自动适配。
+ */
+const KB_LIBRARY = {
+  researcher:{
+    role:'用户研究员',
+    intro:'基于 VOC 与用户原话，识别真实动机与风险',
+    judge:{capThreshold:3.2},
+    capDims:[
+      {name:'VOC 数据量', key:'数据|评价|评论|样本|voc', baseline:3},
+      {name:'分析方法', key:'分析|归因|聚类|统计|交叉', baseline:3},
+      {name:'用户洞察', key:'洞察|动机|心理|需求|真实', baseline:3},
+      {name:'输出表达', key:'报告|输出|可视化|呈现|图表', baseline:3},
+      {name:'行业认知', key:'行业|品类|市场|趋势|竞争', baseline:3},
+      {name:'验证能力', key:'验证|测试|ab|实验|试点', baseline:3}
+    ],
+    envTypes:[
+      {name:'红海竞争', kw:['红海','竞争','内卷','饱和','激烈']},
+      {name:'蓝海机会', kw:['蓝海','空白','新品类','无人','蓝海']},
+      {name:'震荡周期', kw:['波动','不稳定','变化快','不确定']},
+      {name:'单边增长', kw:['增长','上升','红利','爆发']}
+    ],
+    pathSteps:['认知触达','兴趣激发','购买转化','使用体验','复购留存'],
+    contradictions:[
+      {id:'c1',name:'数据不足 vs 决策紧迫',kw:['数据少','样本小','没数据','缺少','数据不足','样本偏'],method:'先补 VOC 采集（≥1000 条）再下结论，避免小样本偏差',source:'矛盾论·抓主要矛盾'},
+      {id:'c2',name:'表面需求 vs 真实动机',kw:['动机','深层','真实需求','伪需求','表面','掩盖'],method:'做 JTBD + 极端用户挖掘，区分声明需求与真实动机',source:'矛盾论·抓主要矛盾'},
+      {id:'c3',name:'小众洞察 vs 规模落地',kw:['规模','落地','大众','普适','泛化'],method:'分群验证 + 早期采纳者试点，再扩到主流',source:'矛盾论·抓主要矛盾'},
+      {id:'c4',name:'短期声量 vs 长期留存',kw:['留存','复购','长期','ltv','口碑'],method:'建留存路径图 + 复购风险拆解，平衡声量与留存',source:'实践论·认识-实践闭环'}
+    ]
+  },
+  operator:{
+    role:'运营',
+    intro:'围绕流量与转化，平衡短期 GMV 与长期健康',
+    judge:{capThreshold:3.2},
+    capDims:[
+      {name:'渠道资源', key:'渠道|流量|投放|资源', baseline:3},
+      {name:'内容能力', key:'内容|文案|素材|创意', baseline:3},
+      {name:'数据分析', key:'数据|分析|转化|漏斗', baseline:3},
+      {name:'活动策划', key:'活动|玩法|促销|裂变', baseline:3},
+      {name:'用户运营', key:'用户|社群|会员|留存', baseline:3},
+      {name:'复盘迭代', key:'复盘|迭代|优化|ab', baseline:3}
+    ],
+    envTypes:[
+      {name:'流量红利期', kw:['红利','增长','上升','爆发']},
+      {name:'存量竞争', kw:['红海','竞争','内卷','饱和','激烈']},
+      {name:'平台变动', kw:['规则','改版','算法','政策','变动']},
+      {name:'淡季周期', kw:['淡季','下滑','低迷','疲软']}
+    ],
+    pathSteps:['曝光触达','点击进入','转化下单','分享裂变','复访留存'],
+    contradictions:[
+      {id:'c1',name:'预算有限 vs 目标过高',kw:['预算','有限','没钱','预算少','成本高'],method:'聚焦单渠道打透 + 自然流量杠杆，先验证 ROI 再加预算',source:'矛盾论·抓主要矛盾'},
+      {id:'c2',name:'拉新成本 vs 留存价值',kw:['拉新','获客','成本','cac','留存','ltv'],method:'算 LTV/CAC，留存跟不上的渠道果断砍',source:'实践论·认识-实践闭环'},
+      {id:'c3',name:'短期 GMV vs 长期健康',kw:['gmv','销量','长期','健康','品牌'],method:'设双指标护栏，GMV 冲刺不伤用户资产',source:'实事求是·基于真实数据'},
+      {id:'c4',name:'平台依赖 vs 自有阵地',kw:['平台','依赖','算法','自有','私域'],method:'建私域/会员做缓冲，降低单平台风险',source:'调查研究·先采真实情况'}
+    ]
+  },
+  pm:{
+    role:'产品经理',
+    intro:'从需求洞察到商业验证，平衡范围与交付',
+    judge:{capThreshold:3.2},
+    capDims:[
+      {name:'需求洞察', key:'需求|用户|痛点|场景', baseline:3},
+      {name:'数据分析', key:'数据|指标|埋点|分析', baseline:3},
+      {name:'技术理解', key:'技术|架构|实现|研发', baseline:3},
+      {name:'项目管理', key:'项目|排期|协调|资源', baseline:3},
+      {name:'商业判断', key:'商业|营收|模式|变现', baseline:3},
+      {name:'原型设计', key:'原型|交互|设计|prd', baseline:3}
+    ],
+    envTypes:[
+      {name:'探索期', kw:['探索','验证','mvp','从0','未知']},
+      {name:'增长期', kw:['增长','扩张','规模','放量']},
+      {name:'红海竞争', kw:['红海','竞争','内卷','饱和','激烈']},
+      {name:'存量优化', kw:['优化','留存','效率','降本']}
+    ],
+    pathSteps:['需求确认','方案设计','研发落地','上线验证','迭代优化'],
+    contradictions:[
+      {id:'c1',name:'需求伪繁荣 vs 真实价值',kw:['伪','表面','真实','噪音','伪需求'],method:'做需求溯源 + 最小化验证，区分"要的"和"有用的"',source:'矛盾论·抓主要矛盾'},
+      {id:'c2',name:'范围蔓延 vs 按期交付',kw:['范围','蔓延','加需求','排期','延期'],method:'MoSCoW 切分，must 优先，其余进 backlog',source:'矛盾论·抓主要矛盾'},
+      {id:'c3',name:'技术理想 vs 商业现实',kw:['技术','理想','商业','变现','成本'],method:'算投入产出，技术债可控前提下优先商业验证',source:'实事求是·基于真实数据'},
+      {id:'c4',name:'功能堆叠 vs 体验简洁',kw:['堆叠','多','复杂','简洁','体验'],method:'做核心路径减法，非核心后置',source:'调查研究·先采真实情况'}
+    ]
+  }
+};
+
+/* ===================== 工具函数 ===================== */
+function snippets(text){return text.split(/[。\n;；，,.]/).map(s=>s.trim()).filter(Boolean);}
+function findSnippet(text,kw){const s=snippets(text).find(x=>x.includes(kw));return s?('"'+s+'"'):('含"'+kw+'"');}
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+
+/* ===================== 动态常识层：维度反向元矛盾生成器 (CAMC = M(KB)) =====================
+ * 反射式路由核心：接入 KB 后，路由器内部的元规则 M 自动从 KB 的 capDims
+ * 反推出"否定 / 缺失"类元矛盾，无需外部硬编码常识词表。
+ * 这正是"接入知识库 → 路由结构本身变化"的实例：换了 KB，常识层的视野随之变。
+ * 两层：
+ *   层1 否定共现 —— 某句同时含 NEG 否定词与 dim 触发词 → 该维度被架空
+ *   层2 覆盖缺口 —— 核心维度 (baseline>=3) 全程无命中 → 无信息支撑
+ */
+const NEG=['不','没','不用','无需','忽略','无视','凭直觉','拍脑袋','老板说','跟风','盲目','跟价','降价','别看','放弃','缺乏','缺少','不足','不看数据','不靠','脱离','相信直觉'];
+function genMetaContradictions(text,kb){
+  const sn=snippets(text); const dyn=[];
+  kb.capDims.forEach((d,idx)=>{
+    const ks=(d.key||'').split('|').filter(Boolean); if(!ks.length)return;
+    const baseline=d.baseline||3;
+    // 层1 · 否定共现
+    const negSent=sn.filter(s=>NEG.some(n=>s.includes(n)));
+    const negHit=negSent.filter(s=>ks.some(k=>s.includes(k)));
+    if(negHit.length){
+      dyn.push({id:'dyn_neg_'+idx,name:'「'+d.name+'」被架空/否定',
+        kw:ks.filter(k=>negHit.some(s=>s.includes(k))),
+        method:'检测到对「'+d.name+'」的否定信号（如"不用/凭直觉/拍脑袋"）。该维度依据被削弱，决策不可建立在被架空的依据上，需补足真实数据或证据。',
+        source:'动态常识层·维度反向',dyn:true,_score:negHit.length});
+    }
+    // 层2 · 覆盖缺口
+    const covHit=ks.filter(k=>text.includes(k));
+    if(baseline>=3 && covHit.length===0){
+      dyn.push({id:'dyn_gap_'+idx,name:'「'+d.name+'」全程无信息支撑',
+        kw:[],method:'核心维度「'+d.name+'」在描述中无任何提及，决策缺少该维度依据，应先补齐相关信息再下结论。',
+        source:'动态常识层·维度反向',dyn:true,_score:1});
+    }
+  });
+  return dyn;
+}
+
+/* ===================== 核心引擎（全透明逐步记录 · 岗位无关） ===================== */
+/* 引擎内核只认 kb 对象（符合 KB Schema），不引用任何具体岗位名。
+   加新岗位 = 提供一份知识库 JSON，引擎按同一套路径跑出结果。 */
+function analyze(text,kb,aiCtx){
+  const out={text, steps:[]};
+  const mk=(phase,no,name,mao,input,evals,output)=>out.steps.push({phase,no,name,mao,input,evals,output});
+  const capTh=(kb.judge&&kb.judge.capThreshold)||3.2;
+
+  // 知识层：加载知识库
+  mk('知识',0,'加载知识库 · '+kb.role,'实事求是·基于真实数据',
+    '读取当前知识库的规则（能力维度 / 环境类型 / 矛盾库 / 结果路径）',
+    [].concat(
+      kb.capDims.map(d=>({item:d.name,cond:'能力维度',fired:true,detail:'默认基线 '+(d.baseline||3)+'/5'})),
+      kb.envTypes.map(e=>({item:e.name,cond:'环境类型',fired:true,detail:'触发词 '+e.kw.join('/')})),
+      kb.contradictions.map(c=>({item:c.name,cond:'矛盾',fired:true,detail:'来源 '+c.source}))
+    ),
+    '已加载 '+kb.capDims.length+' 维能力 · '+kb.envTypes.length+' 类环境 · '+kb.contradictions.length+' 条矛盾');
+
+  // ① 结果锚点
+  const goals=[]; const risks={must:[],accept:[],strive:[]};
+  const goalRe=/目标|想|要|达成|提升|增加|优化|希望|建立/;
+  const mustRe=/必须|关键|核心|致命|担心|怕/;
+  const accRe=/可能|偶尔|轻微|一般|或许/;
+  const strRe=/可以|尝试|努力|争取|希望/;
+  const sn=snippets(text);
+  const cls=sn.map(s=>{
+    const negCtx=NEG.some(n=>s.includes(n)); // 否定语境不计入目标（如"不用看数据"）
+    const g=goalRe.test(s)&&!negCtx,m=mustRe.test(s),a=accRe.test(s),st=strRe.test(s);
+    if(g)goals.push(s);
+    if(m)risks.must.push(s); else if(a)risks.accept.push(s); else if(st)risks.strive.push(s);
+    return {s,g,m,a,st};
+  });
+  out.goals=goals; out.risks=risks;
+  if(aiCtx&&aiCtx.enabled&&Array.isArray(aiCtx.goals)){ // M(AI) 层3：用语义结果覆盖纯规则分类（修"跟着降被判目标"等语义坑）
+    goals.length=0; aiCtx.goals.forEach(g=>goals.push(g));
+    if(aiCtx.risks){ risks.must=aiCtx.risks.must||[]; risks.accept=aiCtx.risks.accept||[]; risks.strive=aiCtx.risks.strive||[]; }
+    out.aiUsed=true;
+  }
+  mk('加工',1,'① 结果锚点 · 目标与风险切割','调查研究·先采真实情况',
+    '对输入做分句（共 '+sn.length+' 句），逐句判定目标 / 风险归属',
+    cls.map(c=>{
+      const tag=c.m?'→必须克服':c.a?'→可接受':c.st?'→可努力':c.g?'→目标':'→未归类';
+      return {item:c.s.slice(0,20)+(c.s.length>20?'…':''),cond:'目标='+c.g+' 必克='+c.m+' 可接受='+c.a+' 可努力='+c.st,fired:c.g||c.m||c.a||c.st,detail:tag};
+    }),
+    '目标 '+goals.length+' 条 · 必须克服 '+risks.must.length+' · 可接受 '+risks.accept.length+' · 可努力 '+risks.strive.length);
+
+  // ② 环境
+  const env=[];
+  const envEvals=kb.envTypes.map(e=>{
+    const hit=e.kw.filter(k=>text.includes(k));
+    const fired=hit.length>0;
+    if(fired)env.push({name:e.name,hit});
+    return {item:e.name,cond:'触发词 '+e.kw.join('/'),fired,detail: fired?'命中 ['+hit.join(',')+']':'未命中'};
+  });
+  if(!env.length) env.push({name:'未识别（建议补充环境描述）',hit:[]});
+  out.env=env;
+  mk('加工',2,'② 环境状况 · 量化视角','调查研究·先采真实情况',
+    '逐类环境类型做触发词核对',
+    envEvals, '识别环境：'+(env.map(e=>e.name).join('、')||'无'));
+
+  // ③ 能力覆盖
+  out.caps=kb.capDims.map(d=>{
+    const ks=d.key.split('|'); const hit=ks.filter(k=>text.includes(k));
+    const cov=hit.length?Math.min(5,3+hit.length):2;
+    return {name:d.name,hit,cov,key:d.key,baseline:d.baseline||3};
+  });
+  const capCov=avg(out.caps.map(c=>c.cov));
+  mk('加工',3,'③ 能力范围 · 覆盖度量化','实事求是·基于真实数据',
+    '逐维能力做触发词核对，按命中数给覆盖分（命中 +3 基线封顶 5；未命中 2）',
+    out.caps.map(c=>({item:c.name,cond:'触发词 '+c.key,fired:c.hit.length>0,
+      detail: c.hit.length?('命中 ['+c.hit.join(',')+'] → '+c.cov+'/5'):'未命中 → 2/5（默认低）'})),
+    '能力覆盖均值 <b>'+capCov.toFixed(2)+' / 5</b>');
+
+  // —— 反射式路由：M(KB) 从 capDims 反推动态元矛盾，并入候选池 ——
+  const dynCons=genMetaContradictions(text,kb).map(dc=>({
+    c:{id:dc.id,name:dc.name,kw:dc.kw,method:dc.method,source:dc.source,dyn:true},
+    hit:dc.kw, score:dc._score
+  }));
+  // —— 反射式路由层3：M(AI) 从 AI 语义结果反推元矛盾（negatedDims），并入候选池 ——
+  if(aiCtx&&aiCtx.enabled&&Array.isArray(aiCtx.negatedDims)){
+    aiCtx.negatedDims.forEach((dn,i)=>{
+      const d=kb.capDims.find(x=>x.name===dn||(x.key||'').split('|').some(k=>dn.indexOf(k)>=0));
+      if(d) dynCons.push({c:{id:'dyn_ai_'+i,name:'「'+d.name+'」被 AI 判为否定/架空',kw:[],
+        method:'AI 语义层判定该维度依据被否定（'+dn+'）。决策不可建立在被架空的依据上。',
+        source:'动态常识层·AI语义',dyn:true},hit:[],score:2});
+    });
+  }
+  // 主矛盾路由
+  const cons=kb.contradictions.map(c=>{
+    const hit=c.kw.filter(k=>text.includes(k));
+    return {c,hit,score:hit.length};
+  }).filter(x=>x.score>0)
+    .concat(dynCons.filter(x=>x.score>0))
+    .sort((a,b)=>b.score-a.score);
+  out.principal=cons.slice(0,2);
+  out.dynCount=dynCons.filter(x=>x.score>0).length;
+  const allConsForTrace=kb.contradictions.concat(dynCons.map(x=>({id:x.c.id,name:x.c.name,kw:x.c.kw,source:x.c.source,dyn:x.c.dyn})));
+  mk('加工',4,'主矛盾路由 · 抓主要矛盾','矛盾论·抓主要矛盾',
+    '逐条矛盾（含动态常识层元矛盾）做触发词核对，按命中数排序取前 2 为主矛盾',
+    allConsForTrace.map(c=>{
+      const hit=c.kw.filter(k=>text.includes(k));
+      const sel=out.principal.some(p=>p.c.id===c.id);
+      const dynFired=c.dyn&&dynCons.some(d=>d.c.id===c.id);
+      return {item:c.name+(c.dyn?' ［动·常识层］':''),cond:'触发词 '+c.kw.join('/'),fired:hit.length>0||dynFired,
+        detail: dynFired?('动态命中 → '+(sel?'★ 入选（前 2）':'未入选')):(hit.length?('命中 '+hit.length+' → '+(sel?'★ 入选（前 2）':'未入选')):'未命中')};
+    }),
+    '主矛盾：'+(out.principal.map(p=>p.c.name).join(' + ')||'未识别')+' ｜ 动态常识层捕获 '+out.dynCount+' 条');
+
+  // ④ 路径图
+  out.path=kb.pathSteps.map((step,i)=>({step,risk:3-i*0.3}));
+
+  // ⑤ 判断原则（分支）
+  const principalHas=out.principal.length>0;
+  let judgeTxt, branch;
+  if(!principalHas){judgeTxt='情况A：路由未识别到明确矛盾（手动矛盾库与动态常识层均未捕获）→ 说明输入缺少可判定矛盾质地的实质性信息，结论仅供参考，请补充目标 / 风险 / 数据依据后再评估'; branch='情况A·无矛盾';}
+  else if(capCov>=capTh){judgeTxt='情况B（能力可覆盖）：匹配度可接受，按推荐方法推进，规避结果属性失真'; branch='情况B·可覆盖';}
+  else {judgeTxt='情况A（能力难覆盖）：能力决定结果上限，先补能力/数据再进场，勿误读侥幸'; branch='情况A·难覆盖';}
+  out.judge=judgeTxt;
+  mk('加工',5,'⑤ 判断原则 · 分支选择','矛盾论 + 实践论',
+    '条件判定：①主矛盾存在? ('+(principalHas?'真':'假')+') ；②能力均值≥'+capTh+'? ('+(capCov>=capTh?'真':'假')+')',
+    [{item:'分支判定',cond:'principalHas && capCov>=capTh',fired:principalHas&&capCov>=capTh,detail:'→ '+branch}],
+    judgeTxt);
+
+  // ⑥ 匹配矩阵
+  out.matrix=out.principal.map(p=>{
+    const isNegated = p.c.dyn && /被架空|否定|无信息支撑/.test(p.c.name); // 依据被否定 → 证据基线崩塌
+    const diff=Math.min(5,3+p.hit.length);
+    const impact=4;
+    let match=Math.round(capCov/diff*100);
+    let light=match>75?'green':match>45?'yellow':'red';
+    if(isNegated){ match=Math.min(match,25); light='red'; } // 决策质量/证据基线维度：依据被否定直接红灯（一票否决）
+    return {risk:p.c.name,diff,impact,cov:capCov.toFixed(1),match,light,source:p.c.source,hit:p.hit,method:p.c.method,dyn:p.c.dyn};
+  });
+  if(!out.matrix.length) out.matrix=[{risk:'（无明确矛盾，建议先定义目标与风险）',diff:0,impact:0,cov:capCov.toFixed(1),match:0,light:'yellow',source:'调查研究',hit:[],method:'补充具体风险描述后再评估'}];
+  mk('加工',6,'⑥ 匹配矩阵 · 匹配度计算','实事求是·基于真实数据',
+    '对每个主矛盾：匹配度 = 能力均值('+capCov.toFixed(1)+') / 难度 × 100，按阈值定灯',
+    out.matrix.map(m=>({item:m.risk,cond:'match = '+capCov.toFixed(1)+' / '+m.diff+' × 100',fired:true,
+      detail:'= '+m.match+'% → '+(m.light==='green'?'绿灯':m.light==='yellow'?'黄灯':'红灯')})),
+    '匹配度：'+out.matrix.map(m=>m.match+'%').join(' / '));
+
+  // ⑦ 雷达 + ⑧ 红绿灯
+  out.radar=out.caps.map(c=>c.cov); out.radarLabels=out.caps.map(c=>c.name);
+  const red=out.matrix.filter(m=>m.light==='red').length;
+  const yellow=out.matrix.filter(m=>m.light==='yellow').length;
+  out.light=red?'red':yellow?'yellow':'green';
+  out.lightText={red:'红灯 · 不进入（能力/数据未覆盖关键风险）',yellow:'黄灯 · 谨慎进入（部分覆盖，先补再扩）',green:'绿灯 · 可以进入（匹配度达标）'}[out.light];
+  mk('加工',7,'⑧ 决策红绿灯 · 三问','矛盾论·抓主要矛盾',
+    '统计矩阵灯色：红 '+red+' / 黄 '+yellow+' → 有红则红，否则有黄则黄，否则绿',
+    [{item:'灯色判定',cond:'red>0 ? 红 : yellow>0 ? 黄 : 绿',fired:true,detail:'→ '+out.light}],
+    out.lightText);
+
+  // ⑨ 反馈闭环
+  out.loop='运行后请在真实结果回流时记录：本结论是否被验证。验证数据将反向修正矛盾权重与能力基线（待接入）。';
+  mk('输出',8,'⑨ 反馈闭环 · 接口预留','实践论·认识-实践闭环',
+    'MVP 预留：真实结果 → 修正权重与基线（当前未接入，输出即终点）',
+    [{item:'接口状态',cond:'feedbackLog 回灌',fired:false,detail:'待接入'}],
+    '闭环接口已留，待真实数据回流后启用');
+
+  // 路由溯源（保留原简洁视图）
+  out.trace=[];
+  out.principal.forEach(p=>{
+    const aiSrc=!!(p.c.source&&p.c.source.indexOf('AI语义')>=0);
+    out.trace.push({out:'主矛盾 → '+p.c.name,rule:p.c.source,hit:p.hit,
+      from:p.hit.map(h=>findSnippet(text,h)),dyn:!!p.c.dyn,ai:aiSrc});
+  });
+  out.trace.push({out:'环境判定 → '+out.env.map(e=>e.name).join('、'),rule:'②环境状况·量化视角',
+    hit:out.env.flatMap(e=>e.hit),from:out.env.flatMap(e=>e.hit.map(h=>findSnippet(text,h)))});
+  out.trace.push({out:'能力覆盖均值 → '+capCov.toFixed(2)+' / 5',rule:'③能力范围·量化',
+    hit:out.caps.flatMap(c=>c.hit),from:out.caps.flatMap(c=>c.hit.map(h=>findSnippet(text,h)))});
+  out.trace.push({out:'决策灯 → '+out.lightText,rule:'⑧决策红绿灯·三问',
+    hit:[],from:['综合 主矛盾匹配度 + 能力覆盖均值 自动计算']});
+
+  return out;
+}
+
+/* ===================== 渲染 ===================== */
+function tagCls(arr,cls){return arr.length?arr.map(x=>'<span class="tag '+(cls||'')+'">'+esc(x)+'</span>').join(''):'<span class="ts">（无）</span>';}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+function renderBoard(R){
+  document.getElementById('b-goals').innerHTML=
+    '<div style="color:var(--t);margin-bottom:8px">目标：</div>'+(R.goals.length?R.goals.map(g=>'<div class="chip">'+esc(g)+'</div>').join(''):'<span class="ts">未识别目标词</span>')+
+    '<div style="color:var(--t);margin:12px 0 6px">风险分类：</div>'+
+    '<span class="ts">必须克服</span>'+tagCls(R.risks.must,'must')+
+    '<span class="ts">可接受</span>'+tagCls(R.risks.accept,'accept')+
+    '<span class="ts">可努力</span>'+tagCls(R.risks.strive,'strive');
+
+  document.getElementById('b-env').innerHTML=R.env.map(e=>
+    '<div class="chip">'+esc(e.name)+(e.hit.length?' <span style="color:var(--teal)">['+e.hit.map(esc).join(',')+']</span>':'')+'</div>').join('');
+
+  document.getElementById('b-caps').innerHTML=R.caps.map(c=>
+    '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">'+
+    '<span>'+esc(c.name)+(c.hit.length?' <span style="color:var(--teal);font-size:11px">'+c.hit.map(esc).join('/')+'</span>':'')+'</span>'+
+    '<span style="color:'+(c.cov>=3?'var(--green)':'var(--yellow)')+'">'+c.cov+'/5</span></div>').join('');
+
+  document.getElementById('b-path').innerHTML=R.path.map((p,i)=>
+    '<div style="display:flex;justify-content:space-between;padding:4px 0">'+
+    '<span>'+esc(p.step)+'</span><span class="ts">风险 '+p.risk.toFixed(1)+'</span></div>').join('');
+
+  document.getElementById('b-judge').innerHTML='<div style="color:var(--t)">'+esc(R.judge)+'</div>';
+
+  document.getElementById('b-matrix').innerHTML=
+    '<table><thead><tr><th>风险项</th><th>难度</th><th>影响</th><th>覆盖</th><th>匹配</th><th>灯</th></tr></thead><tbody>'+
+    R.matrix.map(m=>'<tr><td>'+esc(m.risk)+'<br><span class="src">'+esc(m.source)+'</span></td>'+
+      '<td>'+m.diff+'</td><td>'+m.impact+'</td><td>'+m.cov+'</td><td>'+m.match+'%</td>'+
+      '<td><span class="dot '+m.light+'"></span></td></tr>').join('')+'</tbody></table>'+
+    '<div style="font-size:12px;color:var(--ts);margin-top:8px">推荐：'+R.matrix.map(m=>esc(m.method)).join('；')+'</div>';
+
+  drawRadar(R);
+
+  document.getElementById('b-light').innerHTML=
+    '<div class="light-big"><div class="lamp '+R.light+'">'+(R.light==='green'?'进':R.light==='yellow'?'慎':'停')+'</div>'+
+    '<div style="color:var(--t)">'+esc(R.lightText)+'</div></div>';
+
+  document.getElementById('b-loop').innerHTML='<div style="color:var(--ts);font-size:12.5px">'+esc(R.loop)+'</div>';
+}
+
+function drawRadar(R){
+  const n=R.radar.length, cx=110, cy=110, r=80;
+  const ang=i=>(Math.PI*2*i/n)-Math.PI/2;
+  let grid='';
+  [1,0.75,0.5,0.25].forEach(f=>{
+    let pts=[];for(let i=0;i<n;i++){pts.push((cx+r*f*Math.cos(ang(i))).toFixed(1)+','+(cy+r*f*Math.sin(ang(i))).toFixed(1));}
+    grid+='<polygon points="'+pts.join(' ')+'" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="0.5"/>';
+  });
+  let axis='',labels='',poly='';
+  for(let i=0;i<n;i++){
+    const x=cx+r*Math.cos(ang(i)), y=cy+r*Math.sin(ang(i));
+    axis+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="rgba(255,255,255,.1)" stroke-width="0.5"/>';
+    const lx=cx+(r+16)*Math.cos(ang(i)), ly=cy+(r+16)*Math.sin(ang(i));
+    labels+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" fill="#9aa3b8" font-size="9" text-anchor="middle" dominant-baseline="central">'+esc(R.radarLabels[i].slice(0,4))+'</text>';
+    const v=R.radar[i]/5; const px=cx+r*v*Math.cos(ang(i)), py=cy+r*v*Math.sin(ang(i));
+    poly+=(i?' ':'')+px.toFixed(1)+','+py.toFixed(1);
+  }
+  const svg='<svg viewBox="0 0 220 220" width="220" height="220"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00d4ff"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs>'+
+    grid+axis+'<polygon points="'+poly+'" fill="url(#rg)" fill-opacity="0.25" stroke="url(#rg)" stroke-width="1.5"/>'+labels+'</svg>';
+  document.getElementById('b-radar').innerHTML=svg;
+}
+
+function renderTrace(R){
+  document.getElementById('traceList').innerHTML=R.trace.map(t=>
+    '<div class="trace-item"><div class="from">'+esc(t.from.join('；')||'（综合计算）')+'</div>'+
+    '<div class="rule">→ '+esc(t.out)+'</div>'+
+    '<div class="hit">规则：'+esc(t.rule)+(t.hit.length?' · 命中：['+t.hit.map(esc).join(', ')+']':'')+(t.dyn?(t.ai?' <span class="src">[动·AI]</span>':' <span class="src">[动·常识层]</span>'):'')+'</div></div>').join('');
+}
+
+function renderPath(R){
+  document.getElementById('pathList').innerHTML=R.steps.map(s=>{
+    const evs=s.evals.map(e=>
+      '<tr><td class="ev-item">'+esc(e.item)+'</td>'+
+      '<td class="ev-cond">'+esc(e.cond)+'</td>'+
+      '<td class="'+(e.fired?'ev-ok':'ev-no')+'">'+(e.fired?'✓':'✗')+'</td>'+
+      '<td class="ev-cond">'+esc(e.detail)+'</td></tr>').join('');
+    return '<div class="path-step">'+
+      '<div class="path-head">'+
+        '<span class="path-dot"></span>'+
+        '<span class="path-no">'+s.no+'</span>'+
+        '<span class="path-name">'+esc(s.name)+'</span>'+
+        '<span class="path-mao">'+esc(s.mao)+'</span>'+
+      '</div>'+
+      '<div class="path-input">输入：'+esc(s.input)+'</div>'+
+      '<table class="path-ev"><tbody>'+evs+'</tbody></table>'+
+      '<div class="path-out">产出：'+s.output+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+/* ===================== AI 增强层 (M(AI) · 层3 语义分支) =====================
+ * 反射式路由：接入 AI 后，路由器内部长出"语义分支"节点（M(AI)）。
+ * 不是新工具/聊天框，而是对纯规则的目标-风险-否定判定做语义校准。
+ * Key 仅存浏览器 localStorage，引擎直连服务商，绝不进仓库。
+ */
+function getAIConfig(){ try{ return JSON.parse(localStorage.getItem('gte_ai')||'{}'); }catch(e){ return {}; } }
+function setAIConfig(c){ try{ localStorage.setItem('gte_ai', JSON.stringify(c)); }catch(e){} }
+function initAI(){
+  const cfg=getAIConfig();
+  const sw=document.getElementById('aiSw'), key=document.getElementById('aiKey'), prov=document.getElementById('aiProvider');
+  if(!sw)return;
+  sw.checked=!!cfg.enabled; key.value=cfg.key||''; prov.value=cfg.provider||'deepseek';
+  sw.onchange=()=>{ const c=getAIConfig(); c.enabled=sw.checked; setAIConfig(c); document.getElementById('aiKeyWrap').style.display=sw.checked?'block':'none'; };
+  key.onchange=()=>{ const c=getAIConfig(); c.key=key.value.trim(); setAIConfig(c); };
+  prov.onchange=()=>{ const c=getAIConfig(); c.provider=prov.value; setAIConfig(c); };
+  document.getElementById('aiKeyWrap').style.display=sw.checked?'block':'none';
+}
+async function callAI(prompt){
+  const cfg=getAIConfig(); if(!cfg.key) throw new Error('未配置 API Key');
+  const base=cfg.provider==='deepseek'?'https://api.deepseek.com/v1':(cfg.base||'https://api.openai.com/v1');
+  const model=cfg.provider==='deepseek'?'deepseek-chat':(cfg.model||'gpt-4o-mini');
+  const res=await fetch(base+'/chat/completions',{
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},
+    body:JSON.stringify({model, messages:[
+      {role:'system',content:'你是语义分析器。只输出 JSON，不要任何解释。'},
+      {role:'user',content:prompt}], temperature:0.2, response_format:{type:'json_object'}})
+  });
+  if(!res.ok) throw new Error('AI 调用失败 '+res.status);
+  return JSON.parse((await res.json()).choices[0].message.content);
+}
+function buildAIPrompt(text,kb){
+  return '分析下面的任务描述，做语义级（而非关键词）的目标/风险/否定识别。\n岗位：'+kb.role+
+    '\n能力维度：'+kb.capDims.map(d=>d.name).join('、')+
+    '\n\n任务描述：'+text+
+    '\n\n返回 JSON：{"goals":[真正想达成的结果，排除盲从/跟风的被动动作，如"跟着降"不算目标],'+
+    '"risks":{"must":[必须克服的风险句],"accept":[可接受风险句],"strive":[可努力项句]},'+
+    '"negatedDims":[被否定或架空的能力维度名，如"数据"维度被"不用看数据"否定],'+
+    '"notes":"一句话语义洞察"}';
+}
+
+/* ===================== 知识库加载（可插拔） ===================== */
+let STATE={kb:null};
+
+// 把任意外部 JSON 规范化为引擎可识别的 KB Schema
+function normalizeKB(o){
+  if(!o || typeof o!=='object') throw new Error('不是合法对象');
+  if(!Array.isArray(o.capDims)||!o.capDims.length) throw new Error('缺少 capDims 数组');
+  if(!Array.isArray(o.contradictions)||!o.contradictions.length) throw new Error('缺少 contradictions 数组');
+  return {
+    role:o.role||'外部知识库',
+    intro:o.intro||'',
+    judge:(o.judge&&typeof o.judge==='object')?o.judge:{capThreshold:3.2},
+    capDims:o.capDims.map(d=>({name:d.name,key:d.key||'',baseline:typeof d.baseline==='number'?d.baseline:(d.def||3)})),
+    envTypes:Array.isArray(o.envTypes)?o.envTypes.map(e=>({name:e.name,kw:Array.isArray(e.kw)?e.kw:[]})):[],
+    pathSteps:Array.isArray(o.pathSteps)?o.pathSteps:[],
+    contradictions:o.contradictions.map(c=>({id:c.id||('c'+Math.random().toString(36).slice(2,7)),name:c.name,kw:Array.isArray(c.kw)?c.kw:[],method:c.method||'',source:c.source||'矛盾论'}))
+  };
+}
+
+function initKB(){
+  const sel=document.getElementById('kbSel');
+  sel.innerHTML=Object.keys(KB_LIBRARY).map(k=>'<option value="'+k+'">'+esc(KB_LIBRARY[k].role)+'</option>').join('');
+  sel.onchange=e=>{ STATE.kb=KB_LIBRARY[e.target.value]; refreshKBInfo(); };
+  STATE.kb=KB_LIBRARY[Object.keys(KB_LIBRARY)[0]];
+  refreshKBInfo();
+}
+
+function refreshKBInfo(){
+  const kb=STATE.kb; if(!kb)return;
+  document.getElementById('kbInfo').textContent='当前知识库：'+kb.role+(kb.intro?' · '+kb.intro:'')+
+    ' ｜ '+kb.capDims.length+' 维能力 · '+kb.envTypes.length+' 类环境 · '+kb.contradictions.length+' 条矛盾';
+}
+
+function addExternalOption(name){
+  const sel=document.getElementById('kbSel');
+  let opt=Array.from(sel.options).find(o=>o.value==='__ext__');
+  if(!opt){opt=document.createElement('option');opt.value='__ext__';sel.appendChild(opt);}
+  opt.textContent='外部：'+name; sel.value='__ext__';
+}
+
+function loadKBFile(input){
+  const f=input.files&&input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result); const kb=normalizeKB(o);
+      STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
+      document.getElementById('genHint').textContent='已加载外部知识库：'+kb.role;
+    }catch(e){ document.getElementById('genHint').textContent='加载失败：'+e.message; }
+  };
+  r.readAsText(f); input.value='';
+}
+
+function togglePaste(){
+  const p=document.getElementById('kbPaste');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+function applyPastedKB(){
+  const t=document.getElementById('kbJson').value.trim();
+  const hint=document.getElementById('kbPasteHint');
+  if(!t){hint.textContent='请先粘贴 JSON';return;}
+  try{
+    const o=JSON.parse(t); const kb=normalizeKB(o);
+    STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
+    hint.textContent='✓ 已应用'; setTimeout(()=>hint.textContent='',2600);
+  }catch(e){ hint.textContent='解析失败：'+e.message; }
+}
+
+/* ===================== 运行 ===================== */
+async function runEngine(){
+  const kb=STATE.kb;
+  if(!kb){document.getElementById('genHint').textContent='请先选择/加载知识库';return;}
+  const text=document.getElementById('sitInput').value.trim();
+  const hintEl=document.getElementById('genHint');
+  if(!text){hintEl.textContent='请先贴入具体情况';return;}
+  hintEl.textContent='';
+  const btn=document.getElementById('runBtn'); btn.disabled=true;
+  const wrap=document.getElementById('genWrap'); wrap.classList.add('show');
+  const bar=document.getElementById('genBar'), pct=document.getElementById('genPct'), txt=document.getElementById('genTxt');
+  const steps=['评估自身资源能力 → 能力范围','评估环境情况 → 风险状态','能力匹配环境 → 匹配度','结果验证 → 反向修正（MVP 暂留接口）'];
+  let i=0;
+  function step(){
+    txt.textContent=steps[i]; const p=Math.round((i+1)/steps.length*100);
+    bar.style.width=p+'%'; pct.textContent=p+'%';
+    i++;
+    if(i<steps.length) setTimeout(step,260);
+    else{
+      try{
+        let aiCtx=null;
+        const cfg=getAIConfig();
+        if(cfg.enabled&&cfg.key){ // 反射式层3：M(AI) 语义校准（失败自动降级为纯规则）
+          try{ txt.textContent='AI 语义层分析中…'; aiCtx=await callAI(buildAIPrompt(text,kb)); aiCtx.enabled=true; }
+          catch(e){ aiCtx=null; console.warn('AI 语义层跳过：',e.message); }
+        }
+        const R=analyze(text,kb,aiCtx); STATE.result=R;
+        renderBoard(R); renderTrace(R); renderPath(R);
+        document.getElementById('boardEmpty').style.display='none';
+        document.getElementById('boardReal').style.display='block';
+        document.getElementById('traceEmpty').style.display='none';
+        document.getElementById('traceReal').style.display='block';
+        document.getElementById('pathEmpty').style.display='none';
+        document.getElementById('pathReal').style.display='block';
+        txt.textContent='思考完成 · 已生成 9 宫格 + 运行路径 + 路由追踪';
+        btn.disabled=false;
+        showPage('path');
+      }catch(e){
+        txt.textContent='引擎错误：'+e.message; btn.disabled=false;
+        console.error(e);
+      }
+    }
+  }
+  step();
+}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const map={console:0,board:1,path:2,trace:3,method:4};
+  document.querySelectorAll('.tab')[map[p]].classList.add('active');
+}
+
+initKB(); initAI();
+</script>
+</body>
+</html>
