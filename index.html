@@ -44,6 +44,8 @@ a{color:var(--teal)}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 h1.title{font-size:26px;font-weight:600;margin:34px 0 6px;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .sub{color:var(--ts);font-size:14px;margin-bottom:24px;max-width:640px}
+.sub strong{color:#fff;font-weight:700}
+.sub .hl{background:linear-gradient(120deg,#5fd9ff,#b98bff 55%,#ff9ec4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;white-space:nowrap}
 .glass{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:22px 24px;backdrop-filter:blur(8px)}
 .glass+.glass{margin-top:18px}
 .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
@@ -224,7 +226,7 @@ td .src{color:var(--teal);font-size:11.5px}
   <!-- ============ 工作台 ============ -->
   <section class="page active" id="page-console">
     <h1 class="title">通用思考引擎</h1>
-    <p class="sub">在你拍板之前，帮你把想法过一遍<strong>盲点扫描</strong>。<br>不管你是要做决定、写计划、还是评估一个想法——贴进来，引擎会从多个能力维度逐条检查：哪里有漏洞、哪里自相矛盾、哪些地方你想到了但没想透。它不替你做决定，而是让你在做决定之前，<strong>看得更清楚</strong>。</p>
+    <p class="sub">在你拍板之前，帮你把想法过一遍<span class="hl">盲点扫描</span>。<br>不管你是要<span class="hl">做决定</span>、<span class="hl">写计划</span>、还是<span class="hl">评估一个想法</span>——贴进来，引擎会从多个能力维度逐条检查：<span class="hl">哪里有漏洞</span>、<span class="hl">哪里自相矛盾</span>、<span class="hl">哪些地方你想到了但没想透</span>。它<span class="hl">不替你做决定</span>，而是让你在做决定之前，<strong>看得更清楚</strong>。</p>
 
     <div class="glass">
       <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round"/></svg>STEP 0 · 知识库（可插拔）</div>
