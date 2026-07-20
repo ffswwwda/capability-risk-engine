@@ -122,6 +122,8 @@ td .src{color:var(--teal);font-size:11.5px}
       <div class="tab" onclick="showPage('board')">决策看板</div>
       <div class="tab" onclick="showPage('path')">运行路径</div>
       <div class="tab" onclick="showPage('trace')">路由追踪</div>
+      <div class="tab" onclick="showPage('kb')">知识库</div>
+      <div class="tab" onclick="showPage('hist')">历史</div>
       <div class="tab" onclick="showPage('method')">方法论</div>
     </nav>
   </div>
@@ -169,6 +171,18 @@ td .src{color:var(--teal);font-size:11.5px}
       </div>
 
       <label class="lbl">贴入具体情况 / 任务描述</label>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <select id="caseSel" style="flex:1;min-width:200px" onchange="applyCase(this.value)">
+          <option value="">— 载入内置测试案例（回归用）—</option>
+          <option value="boss">老板拍脑袋 · 数据虚无主义</option>
+          <option value="solid">数据充足 · 稳健可进</option>
+          <option value="pseudo">伪需求自嗨 · 表面繁荣</option>
+          <option value="blue">蓝海探索 · MVP 验证</option>
+          <option value="platform">平台依赖 · 自有阵地缺失</option>
+          <option value="rush">赶工埋债 · 工程质量风险</option>
+        </select>
+        <button class="btn btn-sec" onclick="document.getElementById('caseSel').value='';document.getElementById('sitInput').value=''">清空</button>
+      </div>
       <textarea id="sitInput" rows="7" placeholder="例如：我们要上线一款新品飞机杯，目标是提升品类销量、建立口碑。但目前 VOC 数据只有 200 条，样本偏小。市场竞争激烈属于红海，我们担心表面需求掩盖真实动机。希望先小范围验证再规模落地。"></textarea>
       <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
         <button class="btn btn-primary" id="runBtn" onclick="runEngine()">
@@ -267,6 +281,36 @@ td .src{color:var(--teal);font-size:11.5px}
         <span class="phase-pill" style="background:rgba(255,107,157,.1);border-color:rgba(255,107,157,.3);color:var(--pink)">输出层 · 结论+闭环</span>
       </div>
       <div id="pathList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 知识库编辑器 ============ -->
+  <section class="page" id="page-kb">
+    <h1 class="title">知识库编辑器 · 回写</h1>
+    <p class="sub">反射式路由的核心：知识库即结构生成器。这里可直接编辑当前知识库的矛盾、权重，保存后写回浏览器本地；动态矛盾（［动］）也能固化为手动矛盾，让路由越用越准。下方「M 自检」扫描未被任何矛盾覆盖的能力维度。</p>
+    <div class="glass" id="kbEditor"></div>
+    <div class="glass">
+      <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8l7-5 7 5" stroke-linecap="round" stroke-linejoin="round"/></svg>M 元规则自检 · 覆盖率报告</div>
+      <div class="body" id="mCheck" style="color:var(--t)"></div>
+      <div class="note">M 自检 = 「反射式路由审视自身结构」的轻量版：扫描每个能力维度是否至少有一个矛盾能覆盖它。未覆盖维度意味着该维度的风险无法被路由识别——这正是接入物定义不完整的信号。</div>
+    </div>
+  </section>
+
+  <!-- ============ 历史运行 ============ -->
+  <section class="page" id="page-hist">
+    <h1 class="title">历史运行 · 对比</h1>
+    <p class="sub">每次运行自动存快照（浏览器本地）。勾选两条可做 diff：主矛盾、匹配矩阵、决策灯的变化一目了然，构成压力测试的闭环。</p>
+    <div id="histEmpty" class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h16M12 4v16" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg>
+      <div>暂无历史。运行引擎后这里会累积你的决策轨迹。</div>
+    </div>
+    <div id="histReal" style="display:none">
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-sec" onclick="clearHistory()">清空历史</button>
+        <button class="btn btn-primary" onclick="diffHistory()">对比选中（最多 2 条）</button>
+      </div>
+      <div id="histList"></div>
+      <div id="histDiff" style="margin-top:18px"></div>
     </div>
   </section>
 
@@ -408,6 +452,84 @@ const KB_LIBRARY = {
       {id:'c3',name:'技术理想 vs 商业现实',kw:['技术','理想','商业','变现','成本'],method:'算投入产出，技术债可控前提下优先商业验证',source:'实事求是·基于真实数据'},
       {id:'c4',name:'功能堆叠 vs 体验简洁',kw:['堆叠','多','复杂','简洁','体验'],method:'做核心路径减法，非核心后置',source:'调查研究·先采真实情况'}
     ]
+  },
+  founder:{
+    role:'创始人 / 创业者',
+    intro:'在资源极度约束下做生死决策，平衡愿景与现金流',
+    judge:{capThreshold:3.0},
+    capDims:[
+      {name:'现金流', key:'现金流|资金|融资|收入|烧钱', baseline:3},
+      {name:'团队能力', key:'团队|人才|合伙人|招聘|组织', baseline:3},
+      {name:'市场需求', key:'需求|市场|用户|痛点|客户', baseline:3},
+      {name:'商业模式', key:'模式|营收|变现|盈利|毛利', baseline:3},
+      {name:'产品技术', key:'产品|技术|研发|demo|迭代', baseline:3},
+      {name:'竞争壁垒', key:'壁垒|护城河|优势|差异化|专利', baseline:3}
+    ],
+    envTypes:[
+      {name:'资本寒冬', kw:['寒冬','没钱','融资难','紧缩','低迷']},
+      {name:'风口期', kw:['风口','红利','爆发','增长','热度']},
+      {name:'红海竞争', kw:['红海','竞争','内卷','饱和','激烈']},
+      {name:'政策变动', kw:['政策','监管','合规','牌照','变动']}
+    ],
+    pathSteps:['找痛点','组团队','做 MVP','验证需求','跑通模式','放大规模'],
+    contradictions:[
+      {id:'c1',name:'烧钱扩张 vs 现金流安全',kw:['扩张','烧钱','规模','现金流','资金','融资'],weight:1.2,method:'设 18 个月现金护栏，未跑通单位经济模型前不盲目加杠杆',source:'矛盾论·抓主要矛盾'},
+      {id:'c2',name:'伪需求自嗨 vs 真实付费',kw:['伪','自嗨','需求','付费','真实','痛点'],weight:1.1,method:'用付费意愿验证需求，免费点赞≠真实需求',source:'实事求是·基于真实数据'},
+      {id:'c3',name:'全能亲为 vs 团队补齐',kw:['亲为','自己上','招人','团队','合伙人','补齐'],weight:1,method:'短板用合伙人/雇佣补，创始人聚焦战略与融资',source:'群众路线·从岗位中来'},
+      {id:'c4',name:'完美产品 vs 快速验证',kw:['完美','打磨','mvp','验证','快速','上线'],weight:1,method:'MVP 先验证最关键假设，再谈完美',source:'实践论·认识-实践闭环'}
+    ]
+  },
+  investor:{
+    role:'投资人',
+    intro:'在信息不对称下判断项目价值与风险，平衡回报与风控',
+    judge:{capThreshold:3.1},
+    capDims:[
+      {name:'赛道判断', key:'赛道|行业|市场|趋势|天花板', baseline:3},
+      {name:'团队评估', key:'团队|创始人|合伙人|背景|执行力', baseline:3},
+      {name:'数据验证', key:'数据|指标|增长|留存|单位经济', baseline:3},
+      {name:'估值定价', key:'估值|定价|贵|便宜|倍数|ps', baseline:3},
+      {name:'风险控制', key:'风险|风控|对赌|退出|稀释', baseline:3},
+      {name:'退出路径', key:'退出|ipo|并购|流动性|兜底', baseline:3}
+    ],
+    envTypes:[
+      {name:'估值高点', kw:['高点','泡沫','贵','火热','溢价']},
+      {name:'估值低点', kw:['低点','低估','便宜','底部','冷淡']},
+      {name:'政策利好', kw:['利好','支持','鼓励','试点','开放']},
+      {name:'不确定性', kw:['不确定','波动','黑天鹅','风险','未知']}
+    ],
+    pathSteps:['扫赛道','看团队','验数据','谈条款','投后赋能','退出变现'],
+    contradictions:[
+      {id:'c1',name:'故事漂亮 vs 数据支撑',kw:['故事','愿景','数据','指标','支撑','漂亮'],weight:1.2,method:'故事要能拆成可验证指标，无数据的增长叙事一票否决',source:'矛盾论·抓主要矛盾'},
+      {id:'c2',name:'高估值追涨 vs 安全边际',kw:['估值','贵','追涨','泡沫','安全','边际'],weight:1.1,method:'设估值上限与安全边际，不在高点 FOMO 接盘',source:'实事求是·基于真实数据'},
+      {id:'c3',name:'创始人光环 vs 执行力',kw:['光环','背景','名校','大厂','执行力','落地'],weight:1,method:'背景加分但看交付记录，空谈战略无落地的砍',source:'实践论·认识-实践闭环'},
+      {id:'c4',name:'单一退出 vs 多元兜底',kw:['退出','ipo','并购','兜底','流动性','单一'],weight:1,method:'投前确认至少两条退出路径，单一退出风险高',source:'矛盾论·抓主要矛盾'}
+    ]
+  },
+  engineer:{
+    role:'工程师 / 技术负责人',
+    intro:'在质量、速度与成本三角中做技术取舍',
+    judge:{capThreshold:3.2},
+    capDims:[
+      {name:'架构能力', key:'架构|设计|模块|扩展|耦合', baseline:3},
+      {name:'交付速度', key:'速度|工期|排期|快速|迭代', baseline:3},
+      {name:'系统稳定', key:'稳定|可靠|容错|可用|宕机', baseline:3},
+      {name:'工程质量', key:'质量|测试|规范|评审|技术债', baseline:3},
+      {name:'资源成本', key:'成本|资源|算力|服务器|预算', baseline:3},
+      {name:'团队协作', key:'协作|沟通|文档|对齐|分工', baseline:3}
+    ],
+    envTypes:[
+      {name:'紧急上线', kw:['紧急','赶','deadline','上线','救火']},
+      {name:'平稳迭代', kw:['平稳','迭代','优化','常规','维护']},
+      {name:'高并发压力', kw:['高并发','峰值','流量','压力','扩容']},
+      {name:'人员变动', kw:['离职','新人','空缺','变动','招聘']}
+    ],
+    pathSteps:['需求拆解','方案设计','编码实现','测试验证','发布上线','监控运维'],
+    contradictions:[
+      {id:'c1',name:'过度设计 vs 快速交付',kw:['过度','设计','抽象','通用','快速','交付'],weight:1.1,method:'YAGNI：先满足当前需求，避免为未知未来过度抽象',source:'矛盾论·抓主要矛盾'},
+      {id:'c2',name:'赶工埋债 vs 工程质量',kw:['赶工','技术债','测试','质量','评审','快'],weight:1.2,method:'设质量红线（关键路径必须有测试），债要记台账定期还',source:'实践论·认识-实践闭环'},
+      {id:'c3',name:'单机性能 vs 分布式复杂度',kw:['性能','分布式','扩展','复杂度','单机','扩容'],weight:1,method:'没到瓶颈不引入分布式，用简单方案先扛住',source:'实事求是·基于真实数据'},
+      {id:'c4',name:'成本优化 vs 稳定冗余',kw:['成本','省钱','冗余','稳定','可用','缩'],weight:1,method:'核心链路留冗余保稳定，非核心再压成本',source:'矛盾论·抓主要矛盾'}
+    ]
   }
 };
 
@@ -415,6 +537,43 @@ const KB_LIBRARY = {
 function snippets(text){return text.split(/[。\n;；，,.]/).map(s=>s.trim()).filter(Boolean);}
 function findSnippet(text,kw){const s=snippets(text).find(x=>x.includes(kw));return s?('"'+s+'"'):('含"'+kw+'"');}
 function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+
+/* ===================== 本地存储层（反馈 / 历史 / KB 覆盖 / 外部 KB） ===================== */
+// 反馈日志：contradictionId -> {right, wrong}
+function getFeedback(){ try{ return JSON.parse(localStorage.getItem('gte_feedback')||'{}'); }catch(e){ return {}; } }
+function setFeedback(f){ try{ localStorage.setItem('gte_feedback', JSON.stringify(f)); }catch(e){} }
+// 反馈因子：被标"对"升权、被标"错"降权（反射式路由：用户反馈即接入物，反哺结构）
+function feedbackFactor(id){
+  const f=getFeedback()[id]; if(!f) return 1;
+  return Math.max(0.2, Math.min(3, 1 + 0.25*(f.right||0) - 0.35*(f.wrong||0)));
+}
+// 历史运行快照
+function getHistory(){ try{ return JSON.parse(localStorage.getItem('gte_history')||'[]'); }catch(e){ return []; } }
+function pushHistory(snap){
+  const h=getHistory(); h.unshift(snap);
+  while(h.length>40) h.pop();
+  try{ localStorage.setItem('gte_history', JSON.stringify(h)); }catch(e){}
+}
+// KB 覆盖（编辑回写 / 固化动态矛盾）：role -> {contradictions:[...]}
+function getKBOverrides(){ try{ return JSON.parse(localStorage.getItem('gte_kb_overrides')||'{}'); }catch(e){ return {}; } }
+function setKBOverride(role,kb){
+  const o=getKBOverrides(); o[role]={contradictions:kb.contradictions.map(c=>({id:c.id,name:c.name,kw:c.kw,method:c.method,source:c.source,weight:c.weight||1}))};
+  try{ localStorage.setItem('gte_kb_overrides', JSON.stringify(o)); }catch(e){}
+}
+// 外部 KB 持久化（可插拔真正持久）
+function getExtKBs(){ try{ return JSON.parse(localStorage.getItem('gte_ext')||'{}'); }catch(e){ return {}; } }
+function setExtKB(kb){
+  const e=getExtKBs(); e[kb.role]=kb;
+  try{ localStorage.setItem('gte_ext', JSON.stringify(e)); }catch(_){}
+}
+// 应用覆盖到 KB 对象
+function applyOverride(kb){
+  const ov=getKBOverrides()[kb.role]; if(!ov||!ov.contradictions) return kb;
+  const map={}; ov.contradictions.forEach(c=>map[c.id]=c);
+  kb.contradictions=kb.contradictions.map(c=>map[c.id]?Object.assign({},c,map[c.id]):c)
+    .concat(ov.contradictions.filter(c=>!kb.contradictions.some(x=>x.id===c.id)));
+  return kb;
+}
 
 /* ===================== 动态常识层：维度反向元矛盾生成器 (CAMC = M(KB)) =====================
  * 反射式路由核心：接入 KB 后，路由器内部的元规则 M 自动从 KB 的 capDims
@@ -524,7 +683,7 @@ function analyze(text,kb,aiCtx){
     '能力覆盖均值 <b>'+capCov.toFixed(2)+' / 5</b>');
 
   // —— 反射式路由：M(KB) 从 capDims 反推动态元矛盾，并入候选池 ——
-  const dynCons=genMetaContradictions(text,kb).map(dc=>({
+  let dynCons=genMetaContradictions(text,kb).map(dc=>({
     c:{id:dc.id,name:dc.name,kw:dc.kw,method:dc.method,source:dc.source,dyn:true},
     hit:dc.kw, score:dc._score
   }));
@@ -537,10 +696,20 @@ function analyze(text,kb,aiCtx){
         source:'动态常识层·AI语义',dyn:true},hit:[],score:2});
     });
   }
-  // 主矛盾路由
+  // —— 反射式路由层3 合并：同 capDim 的 CAMC 与 M(AI) 动态矛盾合并为"双源确认"（减少阶段收敛）——
+  const dynMap={};
+  dynCons.forEach(d=>{
+    const m=d.c.id.match(/^dyn_(?:neg|gap|ai)_(\d+)$/);
+    const key=m?('dim_'+m[1]):d.c.id;
+    if(dynMap[key]){ dynMap[key].c.name+='（双源确认）'; dynMap[key].c.source='动态常识层·双源'; dynMap[key].score=Math.max(dynMap[key].score,d.score); }
+    else dynMap[key]=d;
+  });
+  dynCons=Object.values(dynMap);
+  // 主矛盾路由（手动矛盾 score 含 weight×feedback 因子；动态矛盾保持原 score）
   const cons=kb.contradictions.map(c=>{
     const hit=c.kw.filter(k=>text.includes(k));
-    return {c,hit,score:hit.length};
+    const w=(c.weight||1)*feedbackFactor(c.id);
+    return {c,hit,score:hit.length*w};
   }).filter(x=>x.score>0)
     .concat(dynCons.filter(x=>x.score>0))
     .sort((a,b)=>b.score-a.score);
@@ -667,7 +836,162 @@ function renderBoard(R){
     '<div class="light-big"><div class="lamp '+R.light+'">'+(R.light==='green'?'进':R.light==='yellow'?'慎':'停')+'</div>'+
     '<div style="color:var(--t)">'+esc(R.lightText)+'</div></div>';
 
-  document.getElementById('b-loop').innerHTML='<div style="color:var(--ts);font-size:12.5px">'+esc(R.loop)+'</div>';
+  renderLoop(R);
+}
+
+/* ===================== 案例库（回归测试） ===================== */
+const CASES={
+  boss:'老板说这个品类肯定能火，让我们直接大干快上。虽然用户反馈很少，但我们相信直觉就行，不用看数据。竞品都在降价，我们也要跟着降。目标是冲一波销量。',
+  solid:'我们已完成 1200 份 VOC 调研，数据显示用户最在意材质安全与静音。竞品集中在低价位，我们锁定中高端差异化。目标是通过真实痛点切入建立口碑，先小范围验证再规模复制。',
+  pseudo:'行业大会很火，大家都在讨论这个方向，朋友圈刷屏。我们觉得需求肯定很大，先做出来再说，具体谁付费后面再看。目标是成为赛道头部。',
+  blue:'这是一个没人做的细分场景，蓝海。我们想用 MVP 快速验证，先看 100 个早期用户愿不愿意用，再决定投入。目标是以最小成本试错。',
+  platform:'我们 90% 的销量都来自某平台，最近平台算法又改了，流量掉了一半。担心长期被掐脖子，想建自己的私域但一直没精力。目标是保住当前 GMV。',
+  rush:'项目 deadline 紧，先赶上线再说，测试后面补。技术债先欠着，反正能跑就行。目标是按时发布。'
+};
+function applyCase(v){ if(!v)return; document.getElementById('sitInput').value=CASES[v]||''; document.getElementById('genHint').textContent='已载入案例：'+document.getElementById('caseSel').selectedOptions[0].text; }
+
+/* ===================== 反馈闭环（标对/错 → 反哺权重） ===================== */
+function renderLoop(R){
+  const f=getFeedback();
+  let html='<div style="color:var(--ts);font-size:12.5px;margin-bottom:10px">'+esc(R.loop)+'</div>';
+  if(!R.principal.length){ html+='<div class="ts">本次无主矛盾可反馈。</div>'; }
+  R.principal.forEach(p=>{
+    const id=p.c.id; const st=f[id]||{right:0,wrong:0};
+    html+='<div style="border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:9px">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+        '<b style="color:var(--t)">'+esc(p.c.name)+'</b>'+
+        (p.c.dyn?'<span class="src">'+esc(p.c.source)+'</span>':'<span class="src">'+esc(p.c.source)+'</span>')+
+      '</div>'+
+      '<div style="display:flex;gap:8px;align-items:center;margin-top:9px;flex-wrap:wrap">'+
+        '<button class="btn btn-sec" style="padding:5px 12px;font-size:12px;color:var(--green);border-color:rgba(29,158,117,.4)" onclick="markFeedback(\''+id+'\',\'right\')">✓ 判断对了</button>'+
+        '<button class="btn btn-sec" style="padding:5px 12px;font-size:12px;color:var(--red);border-color:rgba(226,75,74,.4)" onclick="markFeedback(\''+id+'\',\'wrong\')">✗ 判断错了</button>'+
+        (p.c.dyn?'<button class="btn btn-sec" style="padding:5px 12px;font-size:12px;color:var(--teal);border-color:rgba(0,212,255,.4)" onclick="solidifyDyn(\''+id+'\')">＋ 固化到知识库</button>':'')+
+        '<span class="ts" style="font-size:12px">已记录 对 '+st.right+' / 错 '+st.wrong+'</span>'+
+      '</div>'+
+    '</div>';
+  });
+  document.getElementById('b-loop').innerHTML=html;
+}
+function markFeedback(id,dir){
+  const f=getFeedback(); if(!f[id])f[id]={right:0,wrong:0}; f[id][dir]++; setFeedback(f);
+  if(STATE.result) renderLoop(STATE.result);
+  toast(dir==='right'?'已记「对」：该矛盾下次权重 +':'已记「错」：该矛盾下次权重 −');
+}
+function solidifyDyn(id){
+  const p=STATE.result&&STATE.result.principal.find(x=>x.c.id===id); if(!p)return;
+  const name=p.c.name.replace('（双源确认）','').replace(/^「|」$/g,'');
+  STATE.kb.contradictions.push({id:'u_'+Date.now().toString(36),name,
+    kw:(p.c.kw||[]).slice(),method:p.c.method,source:'固化·'+p.c.source,weight:1.1});
+  setKBOverride(STATE.kb.role,STATE.kb);
+  if(getExtKBs()[STATE.kb.role]) setExtKB(STATE.kb);
+  refreshKBInfo(); renderKB(); mCheck();
+  toast('已固化「'+name+'」到知识库 '+STATE.kb.role);
+}
+
+/* ===================== 知识库编辑器 ===================== */
+function renderKB(){
+  const kb=STATE.kb; if(!kb)return;
+  let html='<div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16" stroke-linecap="round"/></svg>当前知识库：'+esc(kb.role)+' · 共 '+kb.contradictions.length+' 条矛盾</div>';
+  html+='<div style="font-size:12px;color:var(--ts);margin-bottom:10px">权重越高，命中时越优先入选主矛盾；反馈（对/错）会在权重基础上再浮动。</div>';
+  kb.contradictions.forEach((c,i)=>{
+    html+='<div style="border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px">'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+        '<input id="kb_n_'+i+'" value="'+esc(c.name)+'" style="flex:2;min-width:160px" placeholder="矛盾名">'+
+        '<label style="font-size:12px;color:var(--ts);display:flex;align-items:center;gap:6px">权重<input id="kb_w_'+i+'" type="number" step="0.1" min="0.1" max="5" value="'+(c.weight||1)+'" style="width:64px"></label>'+
+        '<button class="btn btn-sec" style="padding:5px 10px;font-size:12px;color:var(--red)" onclick="delCon('+i+')">删除</button>'+
+      '</div>'+
+      '<input id="kb_k_'+i+'" value="'+esc((c.kw||[]).join('，'))+'" style="margin-top:8px" placeholder="触发词（中文逗号分隔）">'+
+      '<input id="kb_m_'+i+'" value="'+esc(c.method||'')+'" style="margin-top:8px" placeholder="推荐方法">'+
+    '</div>';
+  });
+  html+='<div style="display:flex;gap:10px;margin-top:6px">'+
+    '<button class="btn btn-sec" onclick="addCon()">＋ 新增矛盾</button>'+
+    '<button class="btn btn-primary" onclick="saveKB()">保存并写回本地</button>'+
+  '</div>';
+  document.getElementById('kbEditor').innerHTML=html;
+}
+function addCon(){ STATE.kb.contradictions.push({id:'u_'+Date.now().toString(36),name:'',kw:[],method:'',weight:1}); renderKB(); }
+function delCon(i){ STATE.kb.contradictions.splice(i,1); renderKB(); }
+function saveKB(){
+  const kb=STATE.kb;
+  kb.contradictions=kb.contradictions.map((c,i)=>({
+    id:c.id||('u_'+i+Math.random().toString(36).slice(2,5)),
+    name:document.getElementById('kb_n_'+i).value.trim(),
+    kw:document.getElementById('kb_k_'+i).value.split(/[，,]/).map(s=>s.trim()).filter(Boolean),
+    method:document.getElementById('kb_m_'+i).value.trim(),
+    source:c.source||'矛盾论·抓主要矛盾',
+    weight:parseFloat(document.getElementById('kb_w_'+i).value)||1
+  })).filter(c=>c.name);
+  setKBOverride(kb.role,kb);
+  if(getExtKBs()[kb.role]) setExtKB(kb);
+  refreshKBInfo(); mCheck();
+  toast('知识库「'+kb.role+'」已保存（本地）');
+}
+
+/* ===================== M 元规则自检（覆盖率报告） ===================== */
+function mCheck(){
+  const kb=STATE.kb; if(!kb){document.getElementById('mCheck').textContent='';return;}
+  const covered={};
+  kb.contradictions.forEach(c=>{(c.kw||[]).forEach(k=>covered[k]=1);});
+  const gaps=kb.capDims.filter(d=>{
+    const ks=(d.key||'').split('|').filter(Boolean);
+    return !ks.some(k=>covered[k]);
+  });
+  let html='<p style="margin-bottom:10px">扫描 '+kb.capDims.length+' 个能力维度，检查是否被至少一条矛盾的触发词覆盖：</p>';
+  if(!gaps.length) html+='<div style="color:var(--green);font-size:13.5px">✓ 全部维度均有矛盾覆盖，路由结构完整。</div>';
+  else{
+    html+='<div style="color:var(--yellow);font-size:13.5px;margin-bottom:8px">⚠ 发现 '+gaps.length+' 个未被覆盖的维度（其风险无法被路由识别）：</div>';
+    html+='<div>'+gaps.map(g=>'<span class="tag">'+esc(g.name)+' <span class="ts" style="font-size:11px">('+esc(g.key)+')</span></span>').join('')+'</div>';
+    html+='<div style="font-size:12.5px;color:var(--ts);margin-top:10px">建议：在上方编辑器中为这些维度新增矛盾，或在案例回归中观察它们是否真的需要被识别。</div>';
+  }
+  document.getElementById('mCheck').innerHTML=html;
+}
+
+/* ===================== 历史运行 + diff ===================== */
+function renderHistory(){
+  const h=getHistory();
+  document.getElementById('histEmpty').style.display=h.length?'none':'block';
+  document.getElementById('histReal').style.display=h.length?'block':'none';
+  if(!h.length)return;
+  document.getElementById('histList').innerHTML=h.map((s,i)=>
+    '<label style="display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:9px;cursor:pointer">'+
+      '<input type="checkbox" class="histChk" value="'+i+'" style="margin-top:4px">'+
+      '<div style="flex:1">'+
+        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
+          '<b style="color:var(--t)">'+esc(s.role)+'</b>'+
+          '<span class="dot '+s.light+'"></span>'+
+          '<span class="ts" style="font-size:12px">'+new Date(s.ts).toLocaleString('zh-CN')+'</span>'+
+        '</div>'+
+        '<div class="ts" style="font-size:12.5px;margin-top:5px">'+esc(s.text.slice(0,90))+(s.text.length>90?'…':'')+'</div>'+
+        '<div style="margin-top:6px">'+s.principal.map(p=>'<span class="tag">'+esc(p)+'</span>').join('')+'</div>'+
+      '</div>'+
+    '</label>').join('');
+}
+function diffHistory(){
+  const idx=Array.from(document.querySelectorAll('.histChk:checked')).map(c=>+c.value).slice(0,2);
+  if(idx.length<2){ toast('请勾选两条历史记录再对比'); return; }
+  const h=getHistory(); const a=h[idx[0]], b=h[idx[1]];
+  const lamp={green:'绿灯',yellow:'黄灯',red:'红灯'};
+  let html='<div class="glass"><div class="kicker">对比 · '+new Date(a.ts).toLocaleString('zh-CN')+' vs '+new Date(b.ts).toLocaleString('zh-CN')+'</div>';
+  html+='<table><thead><tr><th>维度</th><th>记录 A</th><th>记录 B</th></tr></thead><tbody>';
+  html+='<tr><td>知识库</td><td>'+esc(a.role)+'</td><td>'+esc(b.role)+'</td></tr>';
+  html+='<tr><td>决策灯</td><td><span class="dot '+a.light+'"></span>'+lamp[a.light]+'</td><td><span class="dot '+b.light+'"></span>'+lamp[b.light]+'</td></tr>';
+  const pa=a.principal.join('；')||'（无）', pb=b.principal.join('；')||'（无）';
+  html+='<tr><td>主矛盾</td><td>'+esc(pa)+'</td><td>'+esc(pb)+'</td></tr>';
+  const ma=a.matrix.map(m=>m.risk+' '+m.match+'%('+lamp[m.light]+')').join('；')||'（无）';
+  const mb=b.matrix.map(m=>m.risk+' '+m.match+'%('+lamp[m.light]+')').join('；')||'（无）';
+  html+='<tr><td>匹配矩阵</td><td>'+esc(ma)+'</td><td>'+esc(mb)+'</td></tr>';
+  html+='</tbody></table></div>';
+  document.getElementById('histDiff').innerHTML=html;
+}
+function clearHistory(){ try{ localStorage.removeItem('gte_history'); }catch(e){} renderHistory(); toast('历史已清空'); }
+
+/* ===================== toast ===================== */
+function toast(msg){
+  let t=document.getElementById('gteToast');
+  if(!t){ t=document.createElement('div'); t.id='gteToast'; t.style.cssText='position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:rgba(10,14,26,.95);border:1px solid var(--teal);color:var(--t);padding:11px 18px;border-radius:11px;font-size:13.5px;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.4);transition:.25s;opacity:0;pointer-events:none'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.style.opacity='0',2200);
 }
 
 function drawRadar(R){
@@ -786,6 +1110,11 @@ function normalizeKB(o){
 }
 
 function initKB(){
+  // 反射式路由：外部 KB 也是接入物，持久化并入知识库集合
+  const ext=getExtKBs();
+  Object.keys(ext).forEach(r=>{ KB_LIBRARY['ext_'+r]=ext[r]; });
+  // 应用本地覆盖（编辑回写 / 固化动态矛盾）
+  Object.keys(KB_LIBRARY).forEach(k=>{ KB_LIBRARY[k]=applyOverride(KB_LIBRARY[k]); });
   const sel=document.getElementById('kbSel');
   sel.innerHTML=Object.keys(KB_LIBRARY).map(k=>'<option value="'+k+'">'+esc(KB_LIBRARY[k].role)+'</option>').join('');
   sel.onchange=e=>{ STATE.kb=KB_LIBRARY[e.target.value]; refreshKBInfo(); };
@@ -801,9 +1130,11 @@ function refreshKBInfo(){
 
 function addExternalOption(name){
   const sel=document.getElementById('kbSel');
-  let opt=Array.from(sel.options).find(o=>o.value==='__ext__');
-  if(!opt){opt=document.createElement('option');opt.value='__ext__';sel.appendChild(opt);}
-  opt.textContent='外部：'+name; sel.value='__ext__';
+  const val='ext_'+name;
+  if(!KB_LIBRARY[val]) KB_LIBRARY[val]=STATE.kb;
+  let opt=Array.from(sel.options).find(o=>o.value===val);
+  if(!opt){opt=document.createElement('option');opt.value=val;sel.appendChild(opt);}
+  opt.textContent='外部：'+name; sel.value=val;
 }
 
 function loadKBFile(input){
@@ -812,7 +1143,7 @@ function loadKBFile(input){
   r.onload=()=>{
     try{
       const o=JSON.parse(r.result); const kb=normalizeKB(o);
-      STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
+      setExtKB(kb); STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
       document.getElementById('genHint').textContent='已加载外部知识库：'+kb.role;
     }catch(e){ document.getElementById('genHint').textContent='加载失败：'+e.message; }
   };
@@ -830,7 +1161,7 @@ function applyPastedKB(){
   if(!t){hint.textContent='请先粘贴 JSON';return;}
   try{
     const o=JSON.parse(t); const kb=normalizeKB(o);
-    STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
+    setExtKB(kb); STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
     hint.textContent='✓ 已应用'; setTimeout(()=>hint.textContent='',2600);
   }catch(e){ hint.textContent='解析失败：'+e.message; }
 }
@@ -863,6 +1194,9 @@ async function runEngine(){
         }
         const R=analyze(text,kb,aiCtx); STATE.result=R;
         renderBoard(R); renderTrace(R); renderPath(R);
+        pushHistory({ts:Date.now(), role:kb.role, text, light:R.light,
+          principal:R.principal.map(p=>p.c.name),
+          matrix:R.matrix.map(m=>({risk:m.risk,light:m.light,match:m.match}))});
         document.getElementById('boardEmpty').style.display='none';
         document.getElementById('boardReal').style.display='block';
         document.getElementById('traceEmpty').style.display='none';
@@ -885,8 +1219,10 @@ function showPage(p){
   document.querySelectorAll('.page').forEach(s=>s.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  const map={console:0,board:1,path:2,trace:3,method:4};
+  const map={console:0,board:1,path:2,trace:3,kb:4,hist:5,method:6};
   document.querySelectorAll('.tab')[map[p]].classList.add('active');
+  if(p==='kb'){ renderKB(); mCheck(); }
+  if(p==='hist'){ renderHistory(); }
 }
 
 initKB(); initAI();
