@@ -1641,10 +1641,10 @@ initKB(); initAI();
     {name:'信息比特', cap:'思维外化：知识离开大脑，成为可计算、可复制、可重组的比特。'},
     {name:'1 / 0',  cap:'回归源头：一切又坍缩为最原初的 0 与 1，循环重启——结构生成结构。'}
   ];
-  var N = window.innerWidth<720 ? 620 : 1150;
+  var N = window.innerWidth<720 ? 640 : 1180;
   var canvas=document.getElementById('spCanvas'), ctx=canvas.getContext('2d');
   var cssW=0, cssH=0, DPR=1;
-  var particles=[], stageTargets=[], prevTargets=null, curStage=-1;
+  var particles=[], stageTargets=[], curStage=-1;
   var mouse={x:-9999,y:-9999,on:false};
   function heartPath(x,cx,cy,s){
     x.beginPath(); x.moveTo(cx,cy+s*0.32);
@@ -1654,28 +1654,47 @@ initKB(); initAI();
     x.bezierCurveTo(cx+s*0.5,cy-s*0.08, cx,cy, cx,cy+s*0.32);
     x.closePath();
   }
+  // 真实剪影 -> 像素采样；全部用路径绘制，不依赖任何字体，跨平台零崩
   function sampleShape(kind){
     var S=360, c=document.createElement('canvas'); c.width=S; c.height=S; var x=c.getContext('2d');
-    x.fillStyle='#fff'; x.strokeStyle='#fff'; x.lineWidth=28; x.lineCap='round'; x.lineJoin='round';
+    x.fillStyle='#fff'; x.strokeStyle='#fff'; x.lineWidth=30; x.lineCap='round'; x.lineJoin='round';
     if(kind==='clover'){
       [-90,30,150].forEach(function(ang){
         x.save(); x.translate(180,180); x.rotate(ang*Math.PI/180);
-        heartPath(x,0,-66,92); x.fill(); x.restore();
+        heartPath(x,0,-70,96); x.fill(); x.restore();
       });
-      x.beginPath(); x.moveTo(180,180); x.lineTo(180,306); x.stroke();
+      x.beginPath(); x.moveTo(180,180); x.lineTo(180,318); x.stroke();
     } else if(kind==='human'){
-      x.beginPath(); x.arc(180,118,52,0,6.283); x.fill();
-      x.beginPath(); x.moveTo(118,250); x.lineTo(242,250); x.lineTo(212,332); x.lineTo(148,332); x.closePath(); x.fill();
+      // 直立：头在顶、双臂垂侧、双腿修长
+      x.beginPath(); x.arc(180,96,40,0,6.283); x.fill();
+      x.beginPath(); x.moveTo(150,140); x.lineTo(210,140); x.lineTo(218,292); x.lineTo(142,292); x.closePath(); x.fill();
+      x.lineWidth=30;
+      x.beginPath(); x.moveTo(150,156); x.lineTo(120,258); x.stroke();
+      x.beginPath(); x.moveTo(210,156); x.lineTo(240,258); x.stroke();
+      x.lineWidth=34;
+      x.beginPath(); x.moveTo(156,290); x.lineTo(150,356); x.stroke();
+      x.beginPath(); x.moveTo(204,290); x.lineTo(210,356); x.stroke();
     } else if(kind==='ape'){
-      x.beginPath(); x.arc(180,138,58,0,6.283); x.fill();
-      x.beginPath(); x.ellipse(180,252,98,72,0,0,6.283); x.fill();
-      x.beginPath(); x.ellipse(92,252,30,58,0.5,0,6.283); x.fill();
-      x.beginPath(); x.ellipse(268,252,30,58,-0.5,0,6.283); x.fill();
+      // 弯腰：大头颅前突、长臂垂地、短腿 —— 与 human 姿态明显区分
+      x.beginPath(); x.arc(180,126,48,0,6.283); x.fill();
+      x.beginPath(); x.ellipse(224,148,30,22,0,0,6.283); x.fill();
+      x.beginPath(); x.ellipse(182,236,72,90,0.14,0,6.283); x.fill();
+      x.lineWidth=42;
+      x.beginPath(); x.moveTo(122,196); x.quadraticCurveTo(84,298,122,338); x.stroke();
+      x.beginPath(); x.moveTo(242,196); x.quadraticCurveTo(290,298,252,338); x.stroke();
+      x.lineWidth=34;
+      x.beginPath(); x.moveTo(152,306); x.lineTo(142,352); x.stroke();
+      x.beginPath(); x.moveTo(214,306); x.lineTo(224,352); x.stroke();
     } else if(kind==='bits'){
-      for(var r=0;r<3;r++) for(var col=0;col<4;col++){ x.fillRect(94+col*44,108+r*44,30,30); }
+      var cols=5, rows=6, gx=46, gy=44, ox=180-(cols-1)*gx/2, oy=180-(rows-1)*gy/2;
+      for(var r=0;r<rows;r++) for(var col=0;col<cols;col++){
+        if((r*3+col*7)%5!==4){ x.fillRect(ox+col*gx-15, oy+r*gy-15, 30, 30); }
+      }
     } else if(kind==='binary'){
-      x.beginPath(); x.moveTo(138,88); x.lineTo(138,272); x.stroke();
-      x.beginPath(); x.arc(224,180,72,0,6.283); x.stroke();
+      x.lineWidth=34;
+      x.beginPath(); x.arc(120,180,72,0,6.283); x.stroke();
+      x.beginPath(); x.moveTo(250,108); x.lineTo(250,266); x.stroke();
+      x.beginPath(); x.moveTo(212,132); x.lineTo(250,100); x.stroke();
     }
     var d=x.getImageData(0,0,S,S).data, pts=[];
     for(var yy=0;yy<S;yy+=3) for(var xx=0;xx<S;xx+=3){ if(d[(yy*S+xx)*4+3]>128) pts.push([xx,yy]); }
@@ -1691,14 +1710,14 @@ initKB(); initAI();
   function buildAll(){
     cssW=window.innerWidth; cssH=window.innerHeight; DPR=Math.min(window.devicePixelRatio||1,2);
     canvas.width=Math.round(cssW*DPR); canvas.height=Math.round(cssH*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
-    var cx=cssW/2, cy=cssH*0.42, shapeR=Math.min(cssW*0.32,cssH*0.34), scale=shapeR/120;
+    var cx=cssW/2, cy=cssH*0.42, shapeR=Math.min(cssW*0.30,cssH*0.32), scale=shapeR/150;
     function map(p){ return [cx+(p[0]-180)*scale, cy+(p[1]-180)*scale]; }
     var kinds=['dust','clover','ape','human','bits','binary'];
     stageTargets=[];
     for(var k=0;k<kinds.length;k++){
       var arr;
       if(kinds[k]==='dust'){
-        arr=[]; for(var i=0;i<N;i++){ var a=Math.random()*6.283, rr=Math.sqrt(Math.random())*shapeR*1.05; arr.push([cx+Math.cos(a)*rr, cy+Math.sin(a)*rr]); }
+        arr=[]; for(var i=0;i<N;i++){ var a=Math.random()*6.283, rr=Math.sqrt(Math.random())*shapeR*1.08; arr.push([cx+Math.cos(a)*rr, cy+Math.sin(a)*rr]); }
       } else { arr=resample(sampleShape(kinds[k]),N).map(map); }
       stageTargets.push(arr);
     }
@@ -1723,33 +1742,36 @@ initKB(); initAI();
     nodeEls.forEach(function(d,k){ d.classList.toggle('active',k===i); });
     for(var j=0;j<labelsEl.children.length;j++){ labelsEl.children[j].classList.toggle('active', j<=i); }
   }
-  var cycleDur=17000, autoStart=performance.now(), manualStage=-1, manualUntil=0;
-  function jump(i){ manualStage=i; manualUntil=performance.now()+4500; if(curStage>=0) prevTargets=stageTargets[curStage]; curStage=i; setStageUI(i); }
-  function posFrac(){ return manualStage>=0 ? manualStage/(STAGES.length-1) : ((performance.now()-autoStart)%cycleDur)/cycleDur; }
+  // 连续演化：phase 匀速推进，永不停顿；smoothstep 让每形态附近自然放慢、中段加速
+  var cycleDur=20000, lastT=0, phase=0;
+  function jump(i){ phase=i; setStageUI(i); }
   function frame(now){
-    var stage, factor;
-    if(manualStage>=0 && now<manualUntil){ stage=manualStage; factor=1; }
-    else {
-      if(manualStage>=0){ manualStage=-1; autoStart=now; }
-      var elapsed=((now-autoStart)%cycleDur+cycleDur)%cycleDur;
-      var sf=(elapsed/cycleDur)*STAGES.length, raw=Math.floor(sf)%STAGES.length, mt=sf-Math.floor(sf);
-      stage=raw; factor = mt<0.24 ? mt/0.24 : 1;
-    }
-    if(stage!==curStage){ if(curStage>=0) prevTargets=stageTargets[curStage]; curStage=stage; setStageUI(stage); }
-    var prev=prevTargets||stageTargets[stage], cur=stageTargets[stage];
+    if(!lastT) lastT=now;
+    var dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+    phase += dt*(STAGES.length/cycleDur);
+    if(phase>=STAGES.length) phase-=STAGES.length;
+    if(phase<0) phase+=STAGES.length;
+    var k=Math.floor(phase)%STAGES.length;
+    var k2=(k+1)%STAGES.length;
+    var frac=phase-Math.floor(phase);
+    var ease=frac*frac*(3-2*frac);
+    var near=Math.round(phase)%STAGES.length;
+    if(near!==curStage){ curStage=near; setStageUI(near); }
+    var A=stageTargets[k], B=stageTargets[k2];
     for(var i=0;i<N;i++){
-      var pt=prev[i], tq=cur[i], p=particles[i];
-      if(!pt||!tq||!p) continue;
-      var tx=pt[0]+(tq[0]-pt[0])*factor, ty=pt[1]+(tq[1]-pt[1])*factor;
-      p.vx+=(tx-p.x)*0.09; p.vy+=(ty-p.y)*0.09;
+      var ax=A[i], bx=B[i]; if(!ax||!bx) continue;
+      var tx=ax[0]+(bx[0]-ax[0])*ease, ty=ax[1]+(bx[1]-ax[1])*ease;
+      var p=particles[i];
+      p.vx+=(tx-p.x)*0.085; p.vy+=(ty-p.y)*0.085;
       if(mouse.on){ var dx=p.x-mouse.x, dy=p.y-mouse.y, d2=dx*dx+dy*dy; if(d2<9000){ var dd=Math.sqrt(d2)||1, f=(95-dd)/95*5.5; p.vx+=dx/dd*f; p.vy+=dy/dd*f; } }
-      p.vx*=0.82; p.vy*=0.82; p.x+=p.vx; p.y+=p.vy;
+      p.vx*=0.8; p.vy*=0.8; p.x+=p.vx; p.y+=p.vy;
     }
     ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle='rgba(5,8,15,0.30)'; ctx.fillRect(0,0,cssW,cssH);
+    ctx.fillStyle='rgba(5,8,15,0.25)'; ctx.fillRect(0,0,cssW,cssH);
     ctx.globalCompositeOperation='lighter';
     for(var j=0;j<N;j++){ var q=particles[j]; ctx.beginPath(); ctx.fillStyle='hsla('+q.hue+',90%,65%,0.9)'; ctx.arc(q.x,q.y,q.r,0,6.283); ctx.fill(); }
-    var frac=posFrac(); fillEl.style.width=(frac*100)+'%'; cursorEl.style.left=(frac*100)+'%';
+    var pf=phase/STAGES.length;
+    fillEl.style.width=(pf*100)+'%'; cursorEl.style.left=(pf*100)+'%';
     requestAnimationFrame(frame);
   }
   if(reduce){
