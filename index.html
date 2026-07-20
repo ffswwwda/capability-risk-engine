@@ -130,73 +130,61 @@ td .src{color:var(--teal);font-size:11.5px}
   .main{margin-left:0}
   .grid9{grid-template-columns:1fr}.path-ev .ev-item{max-width:140px}
 }
-/* ===== 开屏动画 splash · 演化回环 + 机械 HUD ===== */
-#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  background:radial-gradient(1000px 700px at 80% -10%,rgba(168,85,247,.18),transparent),radial-gradient(900px 600px at 8% 10%,rgba(0,212,255,.14),transparent),#05080f;font-family:var(--font)}
-#splash.hide{opacity:0;filter:blur(10px);pointer-events:none;transition:opacity .7s ease,filter .7s ease}
-.sp-bg{position:absolute;inset:0;overflow:hidden}
-.sp-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.42;mix-blend-mode:screen;will-change:transform}
-.sp-orb1{width:440px;height:440px;left:-110px;top:-80px;background:radial-gradient(circle,#00d4ff,transparent 70%)}
-.sp-orb2{width:540px;height:540px;right:-150px;bottom:-150px;background:radial-gradient(circle,#a855f7,transparent 70%)}
-.sp-orb3{width:380px;height:380px;left:52%;top:60%;background:radial-gradient(circle,#ff6b9d,transparent 70%)}
-.sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.06) 1px,transparent 1px);background-size:42px 42px;-webkit-mask-image:radial-gradient(circle at 50% 46%,#000,transparent 70%);mask-image:radial-gradient(circle at 50% 46%,#000,transparent 70%);opacity:.5}
-.sp-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);opacity:.5;pointer-events:none}
-.sp-vign{position:absolute;inset:0;box-shadow:inset 0 0 220px 60px rgba(0,0,0,.7);pointer-events:none}
-.sp-stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;will-change:transform;width:min(560px,92vw)}
-.sp-hud{width:100%;display:flex;justify-content:space-between;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:.18em;color:rgba(140,170,200,.7);margin-bottom:14px}
-.sp-hud b{color:#00d4ff;font-weight:600}
-.sp-frame{position:relative;width:min(300px,72vw);aspect-ratio:1;border:1px solid rgba(0,212,255,.35);border-radius:10px;overflow:hidden;background:#04060c;box-shadow:0 0 40px rgba(0,212,255,.12),inset 0 0 30px rgba(0,0,0,.6)}
-.sp-frame .corner{position:absolute;width:18px;height:18px;border:2px solid #00d4ff;opacity:.9;z-index:3}
-.sp-frame .c-tl{top:-1px;left:-1px;border-right:none;border-bottom:none}
-.sp-frame .c-tr{top:-1px;right:-1px;border-left:none;border-bottom:none}
-.sp-frame .c-bl{bottom:-1px;left:-1px;border-right:none;border-top:none}
-.sp-frame .c-br{bottom:-1px;right:-1px;border-left:none;border-top:none}
-.sp-imgwrap{position:absolute;inset:0}
-.sp-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease}
-.sp-img.on{opacity:1}
-.sp-scan{position:absolute;left:0;right:0;height:2px;top:-2px;background:linear-gradient(90deg,transparent,#00d4ff,#a855f7,transparent);box-shadow:0 0 12px #00d4ff;opacity:.85;z-index:2}
-@keyframes spScanMove{0%{top:-2px}100%{top:100%}}
-.sp-frame.play .sp-scan{animation:spScanMove 3.2s linear infinite}
-.sp-meta{margin-top:18px;min-height:76px}
-.sp-step{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;letter-spacing:.2em;color:#00d4ff}
-.sp-name{font-size:clamp(24px,5.4vw,34px);font-weight:700;margin-top:6px;background:linear-gradient(135deg,#00d4ff,#a855f7 55%,#ff6b9d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.sp-cap{margin-top:8px;font-size:13px;color:var(--ts);line-height:1.6;max-width:440px}
-.sp-track{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;justify-content:center}
-.sp-dot{position:relative;padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);color:var(--ts);font-size:12.5px;cursor:pointer;transition:.2s;font-family:inherit}
-.sp-dot:hover{border-color:rgba(0,212,255,.5);color:var(--tp)}
-.sp-dot.active{border-color:#00d4ff;color:#fff;background:rgba(0,212,255,.14);box-shadow:0 0 16px rgba(0,212,255,.25)}
-.sp-dot.active::after{content:'';position:absolute;left:50%;bottom:-9px;width:5px;height:5px;border-radius:50%;background:#00d4ff;transform:translateX(-50%);box-shadow:0 0 8px #00d4ff}
-.sp-enter{margin-top:24px;padding:13px 32px;border-radius:30px;border:1px solid var(--border2);background:var(--glass2);color:var(--tp);font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:10px;backdrop-filter:blur(8px);transition:.2s}
+/* ===== 开屏动画 splash · 粒子演化回环 ===== */
+#splash{position:fixed;inset:0;z-index:9999;overflow:hidden;
+  background:radial-gradient(1100px 720px at 78% -8%,rgba(168,85,247,.16),transparent),radial-gradient(900px 620px at 10% 12%,rgba(0,212,255,.13),transparent),#05080f;font-family:var(--font)}
+#splash.hide{opacity:0;filter:blur(8px);pointer-events:none;transition:opacity .7s ease,filter .7s ease}
+#spCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+.sp-bg{position:absolute;inset:0;overflow:hidden;z-index:0}
+.sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(circle at 50% 44%,#000,transparent 72%);mask-image:radial-gradient(circle at 50% 44%,#000,transparent 72%);opacity:.45}
+.sp-vign{position:absolute;inset:0;box-shadow:inset 0 0 240px 70px rgba(0,0,0,.72);pointer-events:none}
+.sp-top{position:absolute;top:22px;left:0;right:0;display:flex;justify-content:space-between;padding:0 26px;z-index:3;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:.18em;color:rgba(140,170,200,.72);pointer-events:none}
+.sp-top b{color:#00d4ff;font-weight:600}
+.sp-meta{position:absolute;left:0;right:0;top:62%;transform:translateY(-50%);text-align:center;z-index:3;pointer-events:none;padding:0 20px}
+.sp-step{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;letter-spacing:.22em;color:#00d4ff}
+.sp-name{font-size:clamp(26px,6vw,40px);font-weight:700;margin-top:6px;background:linear-gradient(135deg,#00d4ff,#a855f7 55%,#ff6b9d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sp-cap{margin-top:10px;font-size:13.5px;color:var(--ts);line-height:1.65;max-width:460px;margin-left:auto;margin-right:auto}
+.sp-hint{position:absolute;left:0;right:0;bottom:178px;text-align:center;font-size:11px;letter-spacing:.16em;color:rgba(150,175,205,.5);z-index:3;pointer-events:none;font-family:ui-monospace,monospace}
+.sp-timeline{position:absolute;left:0;right:0;bottom:46px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:14px;padding:0 26px}
+.sp-axis{position:relative;width:min(680px,88vw);height:2px;background:rgba(255,255,255,.12);border-radius:2px}
+.sp-axisfill{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,#00d4ff,#a855f7,#ff6b9d);border-radius:2px;box-shadow:0 0 12px rgba(0,212,255,.5)}
+.sp-cursor{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 14px #00d4ff,0 0 22px rgba(168,85,247,.6);left:0;transition:left .12s linear}
+.sp-nodes{position:absolute;inset:0}
+.sp-node{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:#0a0f1a;cursor:pointer;transform:translate(-50%,-50%);transition:.2s;padding:0}
+.sp-node:hover{border-color:rgba(0,212,255,.7);transform:translate(-50%,-50%) scale(1.3)}
+.sp-node.active{border-color:#00d4ff;background:#00d4ff;box-shadow:0 0 14px rgba(0,212,255,.7)}
+.sp-labels{display:flex;justify-content:space-between;width:min(680px,88vw);font-size:11.5px;color:var(--ts);letter-spacing:.04em}
+.sp-labels span{flex:1;text-align:center;transition:.2s}
+.sp-labels span.active{color:#fff;text-shadow:0 0 10px rgba(0,212,255,.4)}
+.sp-enter{margin-top:4px;padding:13px 32px;border-radius:30px;border:1px solid var(--border2);background:var(--glass2);color:var(--tp);font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:10px;backdrop-filter:blur(8px);transition:.2s;z-index:5}
 .sp-enter:hover{border-color:#00d4ff;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.2)}
 .sp-enter svg{width:16px;height:16px}
-.sp-skip{position:absolute;top:22px;right:24px;z-index:3;background:none;border:none;color:var(--ts);font-size:13px;cursor:pointer;opacity:.7;transition:.2s;font-family:inherit}
+.sp-skip{position:absolute;top:22px;right:24px;z-index:6;background:none;border:none;color:var(--ts);font-size:13px;cursor:pointer;opacity:.7;transition:.2s;font-family:inherit}
 .sp-skip:hover{opacity:1;color:var(--tp)}
-@media (prefers-reduced-motion:reduce){.sp-frame.play .sp-scan{animation:none}.sp-scan{display:none}}
+@media (prefers-reduced-motion:reduce){.sp-cursor{transition:none}}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true">
   <div class="sp-bg">
-    <div class="sp-orb sp-orb1"></div>
-    <div class="sp-orb sp-orb2"></div>
-    <div class="sp-orb sp-orb3"></div>
     <div class="sp-grid"></div>
-    <div class="sp-scanlines"></div>
     <div class="sp-vign"></div>
   </div>
-  <div class="sp-stage">
-    <div class="sp-hud"><span>EVOLUTION LOOP // 智能涌现回环</span><span><b>GTE</b> · 通用思考引擎</span></div>
-    <div class="sp-frame" id="spFrame">
-      <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
-      <div class="sp-imgwrap" id="spImgwrap"></div>
-      <div class="sp-scan"></div>
+  <canvas id="spCanvas"></canvas>
+  <div class="sp-top"><span>EVOLUTION LOOP // 智能涌现回环</span><span><b>GTE</b> · 通用思考引擎</span></div>
+  <div class="sp-meta">
+    <div class="sp-step" id="spStep">01 / 06</div>
+    <div class="sp-name" id="spName">微尘</div>
+    <div class="sp-cap" id="spCap"></div>
+  </div>
+  <div class="sp-hint">移动鼠标 · 粒子会散开</div>
+  <div class="sp-timeline">
+    <div class="sp-axis" id="spAxis">
+      <div class="sp-axisfill" id="spAxisFill"></div>
+      <div class="sp-cursor" id="spCursor"></div>
+      <div class="sp-nodes" id="spNodes"></div>
     </div>
-    <div class="sp-meta">
-      <div class="sp-step" id="spStep">01 / 06</div>
-      <div class="sp-name" id="spName">微尘</div>
-      <div class="sp-cap" id="spCap"></div>
-    </div>
-    <div class="sp-track" id="spTrack"></div>
+    <div class="sp-labels" id="spLabels"></div>
     <button class="sp-enter" id="spEnter">进入引擎 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
   <button class="sp-skip" id="spSkip">跳过 ↗</button>
@@ -1644,64 +1632,110 @@ initKB(); initAI();
     setTimeout(function(){ splash.style.display='none'; splash.setAttribute('aria-hidden','true'); }, 720);
   }
   var STAGES=[
-    {img:'assets/splash/dust.png', name:'微尘', cap:'一切的起点：无机物质在混沌中偶然聚合，没有意识，只有概率。'},
-    {img:'assets/splash/clover.png', name:'三叶草', cap:'生命的第一次自觉：物质里长出有机体，开始有了「活下去」的指向。'},
-    {img:'assets/splash/apeman.png', name:'猿人', cap:'意识的萌芽：工具与群体出现，祖先开始为未来做打算。'},
-    {img:'assets/splash/human.png', name:'人类', cap:'自我认知：能反观自身存在的物种——盲点，从此成为可被打捞的对象。'},
-    {img:'assets/splash/bits.png', name:'信息比特世界', cap:'思维外化：知识离开大脑，成为可计算、可复制、可重组的比特。'},
-    {img:'assets/splash/binary.png', name:'1 / 0', cap:'回归源头：一切又坍缩为最原初的 0 与 1，循环重启——结构生成结构。'}
+    {name:'微尘',   cap:'一切的起点：无机物质在混沌中偶然聚合，没有意识，只有概率。'},
+    {name:'三叶草', cap:'生命的第一次自觉：物质里长出有机体，开始有了「活下去」的指向。'},
+    {name:'猿人',   cap:'意识的萌芽：工具与群体出现，祖先开始为未来做打算。'},
+    {name:'人类',   cap:'自我认知：能反观自身存在的物种——盲点，从此成为可打捞的对象。'},
+    {name:'信息比特', cap:'思维外化：知识离开大脑，成为可计算、可复制、可重组的比特。'},
+    {name:'1 / 0',  cap:'回归源头：一切又坍缩为最原初的 0 与 1，循环重启——结构生成结构。'}
   ];
-  var wrap=document.getElementById('spImgwrap'), track=document.getElementById('spTrack');
-  var imgs=[], dots=[];
-  STAGES.forEach(function(s,i){
-    var im=new Image(); im.src=s.img; im.className='sp-img'+(i===0?' on':''); im.alt=s.name; wrap.appendChild(im); imgs.push(im);
-    var b=document.createElement('button'); b.className='sp-dot'+(i===0?' active':''); b.textContent=s.name; b.setAttribute('data-i',i);
-    b.addEventListener('click',function(){ go(i,true); });
-    track.appendChild(b); dots.push(b);
-  });
-  var stepEl=document.getElementById('spStep'), nameEl=document.getElementById('spName'), capEl=document.getElementById('spCap');
-  var frame=document.getElementById('spFrame');
-  var cur=0, autoIv=null;
-  function go(i,user){
-    cur=i; var s=STAGES[i];
-    imgs.forEach(function(im,k){ im.classList.toggle('on',k===i); });
-    dots.forEach(function(d,k){ d.classList.toggle('active',k===i); });
-    stepEl.textContent=('0'+(i+1)).slice(-2)+' / 0'+STAGES.length;
-    nameEl.textContent=s.name; capEl.textContent=s.cap;
-    if(user){ restartAuto(); }
+  var N = window.innerWidth<720 ? 620 : 1150;
+  var canvas=document.getElementById('spCanvas'), ctx=canvas.getContext('2d');
+  var cssW=0, cssH=0, DPR=1;
+  var particles=[], stageTargets=[], prevTargets=null, curStage=-1;
+  var mouse={x:-9999,y:-9999,on:false};
+  function sampleShape(kind){
+    var S=360, c=document.createElement('canvas'); c.width=S; c.height=S; var x=c.getContext('2d');
+    x.fillStyle='#fff'; x.textAlign='center'; x.textBaseline='middle';
+    var emoji='"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+    var cjk='"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif';
+    if(kind==='clover'){ x.font='190px '+emoji; x.fillText('☘',S/2,S/2+8); }
+    else if(kind==='ape'){ x.font='bold 250px '+cjk; x.fillText('猿',S/2,S/2+18); }
+    else if(kind==='human'){ x.font='bold 250px '+cjk; x.fillText('人',S/2,S/2+18); }
+    else if(kind==='bits'){ x.font='bold 200px ui-monospace,Menlo,monospace'; x.fillText('10',S/2,S/2+8); }
+    else if(kind==='binary'){ x.font='bold 220px ui-monospace,Menlo,monospace'; x.fillText('01',S/2,S/2+8); }
+    var d=x.getImageData(0,0,S,S).data, pts=[];
+    for(var yy=0;yy<S;yy+=3) for(var xx=0;xx<S;xx+=3){ if(d[(yy*S+xx)*4+3]>128) pts.push([xx,yy]); }
+    return pts;
   }
-  function restartAuto(){ if(autoIv) clearInterval(autoIv); if(reduce) return; autoIv=setInterval(function(){ go((cur+1)%STAGES.length,false); }, 2600); }
-  frame.classList.add('play'); restartAuto();
+  function resample(pts,n){ var out=[],L=pts.length||1; for(var i=0;i<n;i++){ out.push(pts[Math.floor(i*L/n)%L]); } return out; }
+  function buildAll(){
+    cssW=window.innerWidth; cssH=window.innerHeight; DPR=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=Math.round(cssW*DPR); canvas.height=Math.round(cssH*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
+    var cx=cssW/2, cy=cssH*0.42, shapeR=Math.min(cssW*0.32,cssH*0.34), scale=shapeR/120;
+    function map(p){ return [cx+(p[0]-180)*scale, cy+(p[1]-180)*scale]; }
+    var kinds=['dust','clover','ape','human','bits','binary'];
+    stageTargets=[];
+    for(var k=0;k<kinds.length;k++){
+      var arr;
+      if(kinds[k]==='dust'){
+        arr=[]; for(var i=0;i<N;i++){ var a=Math.random()*6.283, rr=Math.sqrt(Math.random())*shapeR*1.05; arr.push([cx+Math.cos(a)*rr, cy+Math.sin(a)*rr]); }
+      } else { arr=resample(sampleShape(kinds[k]),N).map(map); }
+      stageTargets.push(arr);
+    }
+    if(particles.length!==N){
+      particles=[]; for(var p=0;p<N;p++){ particles.push({x:cx+(Math.random()-.5)*cssW, y:cy+(Math.random()-.5)*cssH, vx:0, vy:0, r:1.1+Math.random()*1.3, hue:190+(p/N)*140}); }
+    }
+  }
+  buildAll();
+  var nodesEl=document.getElementById('spNodes'), labelsEl=document.getElementById('spLabels'), fillEl=document.getElementById('spAxisFill'), cursorEl=document.getElementById('spCursor');
+  var nodeEls=[];
+  STAGES.forEach(function(s,i){
+    var nd=document.createElement('button'); nd.className='sp-node'; nd.setAttribute('data-i',i);
+    nd.addEventListener('click',function(){ jump(i); }); nodesEl.appendChild(nd); nodeEls.push(nd);
+    var lb=document.createElement('span'); lb.textContent=s.name; labelsEl.appendChild(lb);
+  });
+  function layoutNodes(){ nodeEls.forEach(function(nd,i){ nd.style.left=(i/(STAGES.length-1)*100)+'%'; }); }
+  layoutNodes();
+  var stepEl=document.getElementById('spStep'), nameEl=document.getElementById('spName'), capEl=document.getElementById('spCap');
+  function setStageUI(i){
+    stepEl.textContent=('0'+(i+1)).slice(-2)+' / 0'+STAGES.length;
+    nameEl.textContent=STAGES[i].name; capEl.textContent=STAGES[i].cap;
+    nodeEls.forEach(function(d,k){ d.classList.toggle('active',k===i); });
+    for(var j=0;j<labelsEl.children.length;j++){ labelsEl.children[j].classList.toggle('active', j<=i); }
+  }
+  var cycleDur=17000, autoStart=performance.now(), manualStage=-1, manualUntil=0;
+  function jump(i){ manualStage=i; manualUntil=performance.now()+4500; if(curStage>=0) prevTargets=stageTargets[curStage]; curStage=i; setStageUI(i); }
+  function posFrac(){ return manualStage>=0 ? manualStage/(STAGES.length-1) : ((performance.now()-autoStart)%cycleDur)/cycleDur; }
+  function frame(now){
+    var stage, factor;
+    if(manualStage>=0 && now<manualUntil){ stage=manualStage; factor=1; }
+    else {
+      if(manualStage>=0){ manualStage=-1; autoStart=now; }
+      var elapsed=(now-autoStart)%cycleDur, pf=elapsed/cycleDur, sf=pf*STAGES.length, raw=Math.floor(sf)%STAGES.length, mt=sf-Math.floor(sf);
+      stage=raw; factor = mt<0.24 ? mt/0.24 : 1;
+    }
+    if(stage!==curStage){ if(curStage>=0) prevTargets=stageTargets[curStage]; curStage=stage; setStageUI(stage); }
+    var prev=prevTargets||stageTargets[stage], cur=stageTargets[stage];
+    for(var i=0;i<N;i++){
+      var pt=prev[i], tq=cur[i], p=particles[i];
+      var tx=pt[0]+(tq[0]-pt[0])*factor, ty=pt[1]+(tq[1]-pt[1])*factor;
+      p.vx+=(tx-p.x)*0.09; p.vy+=(ty-p.y)*0.09;
+      if(mouse.on){ var dx=p.x-mouse.x, dy=p.y-mouse.y, d2=dx*dx+dy*dy; if(d2<9000){ var dd=Math.sqrt(d2)||1, f=(95-dd)/95*5.5; p.vx+=dx/dd*f; p.vy+=dy/dd*f; } }
+      p.vx*=0.82; p.vy*=0.82; p.x+=p.vx; p.y+=p.vy;
+    }
+    ctx.globalCompositeOperation='source-over';
+    ctx.fillStyle='rgba(5,8,15,0.30)'; ctx.fillRect(0,0,cssW,cssH);
+    ctx.globalCompositeOperation='lighter';
+    for(var j=0;j<N;j++){ var q=particles[j]; ctx.beginPath(); ctx.fillStyle='hsla('+q.hue+',90%,65%,0.9)'; ctx.arc(q.x,q.y,q.r,0,6.283); ctx.fill(); }
+    var frac=posFrac(); fillEl.style.width=(frac*100)+'%'; cursorEl.style.left=(frac*100)+'%';
+    requestAnimationFrame(frame);
+  }
+  if(reduce){
+    curStage=3; setStageUI(3); var cur=stageTargets[3];
+    for(var i=0;i<N;i++){ particles[i].x=cur[i][0]; particles[i].y=cur[i][1]; }
+    ctx.fillStyle='#05080f'; ctx.fillRect(0,0,cssW,cssH); ctx.globalCompositeOperation='lighter';
+    for(var j=0;j<N;j++){ var q=particles[j]; ctx.beginPath(); ctx.fillStyle='hsla('+q.hue+',90%,65%,0.9)'; ctx.arc(q.x,q.y,q.r,0,6.283); ctx.fill(); }
+    fillEl.style.width='50%'; cursorEl.style.left='50%';
+  } else {
+    window.addEventListener('resize',function(){ buildAll(); layoutNodes(); });
+    splash.addEventListener('mousemove',function(e){ mouse.x=e.clientX; mouse.y=e.clientY; mouse.on=true; });
+    splash.addEventListener('mouseleave',function(){ mouse.on=false; mouse.x=-9999; mouse.y=-9999; });
+    requestAnimationFrame(frame);
+  }
   document.getElementById('spEnter').addEventListener('click',dismiss);
   document.getElementById('spSkip').addEventListener('click',dismiss);
-  splash.addEventListener('click',function(e){
-    if(e.target===splash||e.target.classList.contains('sp-bg')||e.target.classList.contains('sp-grid')||e.target.classList.contains('sp-orb')||e.target.classList.contains('sp-scanlines')||e.target.classList.contains('sp-vign')) dismiss();
-  });
-  document.addEventListener('keydown',function(e){
-    if(splash.style.display!=='none'&&(e.key==='Enter'||e.key===' '||e.key==='Escape')) dismiss();
-  });
-  if(!reduce){
-    splash.addEventListener('mousemove',function(e){
-      var rx=(e.clientX/window.innerWidth-0.5), ry=(e.clientY/window.innerHeight-0.5);
-      var stg=document.querySelector('.sp-stage'); if(stg) stg.style.transform='translate('+(rx*-14)+'px,'+(ry*-14)+'px)';
-      var o1=document.querySelector('.sp-orb1'); if(o1) o1.style.transform='translate('+(rx*30)+'px,'+(ry*30)+'px)';
-      var o2=document.querySelector('.sp-orb2'); if(o2) o2.style.transform='translate('+(rx*-36)+'px,'+(ry*-36)+'px)';
-      var o3=document.querySelector('.sp-orb3'); if(o3) o3.style.transform='translate('+(rx*22)+'px,'+(ry*22)+'px)';
-    });
-  }
-  function run(){
-    if(!window.anime || reduce){
-      splash.querySelectorAll('.sp-hud,.sp-frame,.sp-step,.sp-name,.sp-cap,.sp-dot,.sp-enter').forEach(function(el){ el.style.opacity=1; });
-      return;
-    }
-    var an=window.anime;
-    an.animate('.sp-hud',{opacity:[0,1],duration:600,ease:'outQuad'});
-    an.animate('.sp-frame',{opacity:[0,1],scale:[.9,1],duration:800,ease:'outQuad'});
-    an.animate(['.sp-step','.sp-name','.sp-cap'],{opacity:[0,1],translateY:[14,0],duration:560,delay:an.stagger(90,{start:300}),ease:'outQuad'});
-    an.animate('.sp-dot',{opacity:[0,1],scale:[.6,1],duration:480,delay:an.stagger(70,{start:520}),ease:'outBack'});
-    an.animate('.sp-enter',{opacity:[0,1],translateY:[14,0],duration:560,delay:900,ease:'outQuad'});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+  document.addEventListener('keydown',function(e){ if(splash.style.display!=='none'&&(e.key==='Enter'||e.key===' '||e.key==='Escape')) dismiss(); });
 })();
 </script>
 </body>
