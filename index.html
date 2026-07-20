@@ -27,9 +27,14 @@ a{color:var(--teal)}
 .sidebar{position:fixed;top:0;left:0;width:218px;height:100vh;display:flex;flex-direction:column;padding:22px 14px;background:rgba(10,14,26,.92);backdrop-filter:blur(14px);border-right:1px solid var(--border);z-index:50;overflow-y:auto}
 .sidebar .brand{margin-bottom:24px;padding:4px 8px}
 .nav-list{display:flex;flex-direction:column;gap:4px}
-.nav-item{padding:10px 14px;border-radius:11px;font-size:13.5px;color:var(--ts);cursor:pointer;transition:.18s;user-select:none;border:1px solid transparent}
+.nav-group{margin-top:14px}
+.nav-group:first-child{margin-top:0}
+.nav-group-title{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ts);opacity:.42;font-weight:700;padding:2px 14px 7px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:11px;font-size:13.5px;color:var(--ts);cursor:pointer;transition:.18s;user-select:none;border:1px solid transparent}
+.nav-item .nic{width:16px;height:16px;flex:0 0 auto;opacity:.8}
 .nav-item:hover{color:var(--t);background:var(--glass)}
 .nav-item.active{color:var(--tp);background:var(--glass2);border-color:var(--border2)}
+.nav-item.active .nic{opacity:1}
 .side-foot{margin-top:auto;padding:14px 8px 0;font-size:11.5px;color:var(--ts);opacity:.55;border-top:1px solid var(--border)}
 .main{margin-left:218px;flex:1;min-width:0}
 .page{display:none;animation:fade .3s ease}
@@ -118,6 +123,8 @@ td .src{color:var(--teal);font-size:11.5px}
   .sidebar{position:static;width:100%;height:auto;flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px;padding:12px 14px}
   .sidebar .brand{margin-bottom:0;width:100%}
   .nav-list{flex-direction:row;flex-wrap:wrap;gap:4px}
+  .nav-group{width:100%;margin-top:8px}
+  .nav-group-title{width:100%;padding:0 4px 4px}
   .nav-item{padding:8px 12px;font-size:12.5px}
   .side-foot{display:none}
   .main{margin-left:0}
@@ -130,15 +137,27 @@ td .src{color:var(--teal);font-size:11.5px}
   <aside class="sidebar">
     <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 3v18M3 12h18" stroke-linecap="round"/></svg></span>通用思考引擎</div>
     <nav class="nav-list">
-      <div class="nav-item active" data-page="console" onclick="showPage('console')">工作台</div>
-      <div class="nav-item" data-page="report" onclick="showPage('report')">总报告</div>
-      <div class="nav-item" data-page="board" onclick="showPage('board')">决策看板</div>
-      <div class="nav-item" data-page="path" onclick="showPage('path')">运行路径</div>
-      <div class="nav-item" data-page="trace" onclick="showPage('trace')">路由追踪</div>
-      <div class="nav-item" data-page="kb" onclick="showPage('kb')">知识库</div>
-      <div class="nav-item" data-page="hist" onclick="showPage('hist')">历史</div>
-      <div class="nav-item" data-page="method" onclick="showPage('method')">方法论</div>
-      <div class="nav-item" data-page="about" onclick="showPage('about')">整体原理</div>
+      <div class="nav-group">
+        <div class="nav-group-title">工作台</div>
+        <div class="nav-item active" data-page="console" onclick="showPage('console')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>分析台</div>
+        <div class="nav-item" data-page="kb" onclick="showPage('kb')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v14c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></svg>知识库</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">运行结果</div>
+        <div class="nav-item" data-page="report" onclick="showPage('report')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg>总报告</div>
+        <div class="nav-item" data-page="board" onclick="showPage('board')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-5"/></svg>决策看板</div>
+        <div class="nav-item" data-page="hist" onclick="showPage('hist')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>历史</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">运行过程</div>
+        <div class="nav-item" data-page="path" onclick="showPage('path')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4v9a4 4 0 0 0 4 4h4"/><circle cx="6" cy="4" r="2"/><circle cx="18" cy="20" r="2"/></svg>运行路径</div>
+        <div class="nav-item" data-page="trace" onclick="showPage('trace')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>路由追踪</div>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title">原理讲解</div>
+        <div class="nav-item" data-page="method" onclick="showPage('method')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M15 9l-2 5-4 2 2-5z"/></svg>方法论</div>
+        <div class="nav-item" data-page="about" onclick="showPage('about')"><svg class="nic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>整体原理</div>
+      </div>
     </nav>
     <div class="side-foot">反射式动态路由器 · GTE v2</div>
   </aside>
