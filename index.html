@@ -130,42 +130,48 @@ td .src{color:var(--teal);font-size:11.5px}
   .main{margin-left:0}
   .grid9{grid-template-columns:1fr}.path-ev .ev-item{max-width:140px}
 }
-/* ===== 开屏动画 splash ===== */
+/* ===== 开屏动画 splash · 演化回环 + 机械 HUD ===== */
 #splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  background:radial-gradient(1200px 700px at 78% -8%,rgba(168,85,247,.20),transparent),radial-gradient(900px 600px at 12% 12%,rgba(0,212,255,.16),transparent),#070b16}
-#splash.hide{opacity:0;filter:blur(8px);pointer-events:none;transition:opacity .7s ease,filter .7s ease}
+  background:radial-gradient(1000px 700px at 80% -10%,rgba(168,85,247,.18),transparent),radial-gradient(900px 600px at 8% 10%,rgba(0,212,255,.14),transparent),#05080f;font-family:var(--font)}
+#splash.hide{opacity:0;filter:blur(10px);pointer-events:none;transition:opacity .7s ease,filter .7s ease}
 .sp-bg{position:absolute;inset:0;overflow:hidden}
-.sp-orb{position:absolute;border-radius:50%;filter:blur(58px);opacity:.5;mix-blend-mode:screen;will-change:transform}
-.sp-orb1{width:420px;height:420px;left:-90px;top:-70px;background:radial-gradient(circle,#00d4ff,transparent 70%)}
-.sp-orb2{width:520px;height:520px;right:-130px;bottom:-130px;background:radial-gradient(circle,#a855f7,transparent 70%)}
-.sp-orb3{width:360px;height:360px;left:50%;top:62%;background:radial-gradient(circle,#ff6b9d,transparent 70%)}
-.sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(circle at 50% 44%,#000,transparent 72%);mask-image:radial-gradient(circle at 50% 44%,#000,transparent 72%);opacity:.45}
-.sp-stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;will-change:transform}
-.sp-engine{width:min(310px,70vw);aspect-ratio:1;margin-bottom:4px}
-.sp-engine svg{width:100%;height:100%;overflow:visible}
-.sp-ring{fill:none;stroke:url(#spGrad);stroke-width:1.4;stroke-dasharray:4 9;opacity:0;transform-box:fill-box;transform-origin:center}
-.sp-ring-outer{stroke-width:1}
-.sp-link{fill:none;stroke:url(#spGrad);stroke-width:1.4;opacity:0}
-.sp-node{fill:rgba(8,12,24,.9);stroke:url(#spGrad);stroke-width:1.6;opacity:0;transform-box:fill-box;transform-origin:center}
-.sp-nt{fill:#cfd6e6;font-size:13px;text-anchor:middle;font-family:var(--font);font-weight:500;opacity:0}
-.sp-core-ring{fill:none;stroke:url(#spGrad);stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center}
-.sp-core{fill:url(#spGrad);filter:url(#spGlow);opacity:0;transform-box:fill-box;transform-origin:center}
-.sp-m{fill:#fff;font-size:22px;font-weight:700;text-anchor:middle;font-family:var(--font);opacity:0;transform-box:fill-box;transform-origin:center}
-@keyframes spSpin{to{transform:rotate(360deg)}}
-.sp-engine .spin{transform-box:fill-box;transform-origin:center;animation:spSpin 38s linear infinite}
-.sp-title{font-size:clamp(28px,6vw,40px);font-weight:700;letter-spacing:.04em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:8px;line-height:1.1}
-.sp-ch{display:inline-block;opacity:0}
-.sp-sub{margin-top:10px;font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--ts);opacity:0}
-.sp-tag{margin-top:7px;font-size:11.5px;color:var(--ts);opacity:0;letter-spacing:.03em}
-.sp-status{margin-top:18px;font-size:13px;color:var(--teal);min-height:18px;opacity:0;font-variant-numeric:tabular-nums}
-.sp-enter{margin-top:20px;padding:13px 30px;border-radius:30px;border:1px solid var(--border2);background:var(--glass2);color:var(--tp);font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:10px;backdrop-filter:blur(8px);transition:.2s;opacity:0}
-.sp-enter:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.18)}
+.sp-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.42;mix-blend-mode:screen;will-change:transform}
+.sp-orb1{width:440px;height:440px;left:-110px;top:-80px;background:radial-gradient(circle,#00d4ff,transparent 70%)}
+.sp-orb2{width:540px;height:540px;right:-150px;bottom:-150px;background:radial-gradient(circle,#a855f7,transparent 70%)}
+.sp-orb3{width:380px;height:380px;left:52%;top:60%;background:radial-gradient(circle,#ff6b9d,transparent 70%)}
+.sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.06) 1px,transparent 1px);background-size:42px 42px;-webkit-mask-image:radial-gradient(circle at 50% 46%,#000,transparent 70%);mask-image:radial-gradient(circle at 50% 46%,#000,transparent 70%);opacity:.5}
+.sp-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);opacity:.5;pointer-events:none}
+.sp-vign{position:absolute;inset:0;box-shadow:inset 0 0 220px 60px rgba(0,0,0,.7);pointer-events:none}
+.sp-stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;will-change:transform;width:min(560px,92vw)}
+.sp-hud{width:100%;display:flex;justify-content:space-between;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11px;letter-spacing:.18em;color:rgba(140,170,200,.7);margin-bottom:14px}
+.sp-hud b{color:#00d4ff;font-weight:600}
+.sp-frame{position:relative;width:min(300px,72vw);aspect-ratio:1;border:1px solid rgba(0,212,255,.35);border-radius:10px;overflow:hidden;background:#04060c;box-shadow:0 0 40px rgba(0,212,255,.12),inset 0 0 30px rgba(0,0,0,.6)}
+.sp-frame .corner{position:absolute;width:18px;height:18px;border:2px solid #00d4ff;opacity:.9;z-index:3}
+.sp-frame .c-tl{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.sp-frame .c-tr{top:-1px;right:-1px;border-left:none;border-bottom:none}
+.sp-frame .c-bl{bottom:-1px;left:-1px;border-right:none;border-top:none}
+.sp-frame .c-br{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.sp-imgwrap{position:absolute;inset:0}
+.sp-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s ease}
+.sp-img.on{opacity:1}
+.sp-scan{position:absolute;left:0;right:0;height:2px;top:-2px;background:linear-gradient(90deg,transparent,#00d4ff,#a855f7,transparent);box-shadow:0 0 12px #00d4ff;opacity:.85;z-index:2}
+@keyframes spScanMove{0%{top:-2px}100%{top:100%}}
+.sp-frame.play .sp-scan{animation:spScanMove 3.2s linear infinite}
+.sp-meta{margin-top:18px;min-height:76px}
+.sp-step{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:12px;letter-spacing:.2em;color:#00d4ff}
+.sp-name{font-size:clamp(24px,5.4vw,34px);font-weight:700;margin-top:6px;background:linear-gradient(135deg,#00d4ff,#a855f7 55%,#ff6b9d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sp-cap{margin-top:8px;font-size:13px;color:var(--ts);line-height:1.6;max-width:440px}
+.sp-track{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;justify-content:center}
+.sp-dot{position:relative;padding:8px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);color:var(--ts);font-size:12.5px;cursor:pointer;transition:.2s;font-family:inherit}
+.sp-dot:hover{border-color:rgba(0,212,255,.5);color:var(--tp)}
+.sp-dot.active{border-color:#00d4ff;color:#fff;background:rgba(0,212,255,.14);box-shadow:0 0 16px rgba(0,212,255,.25)}
+.sp-dot.active::after{content:'';position:absolute;left:50%;bottom:-9px;width:5px;height:5px;border-radius:50%;background:#00d4ff;transform:translateX(-50%);box-shadow:0 0 8px #00d4ff}
+.sp-enter{margin-top:24px;padding:13px 32px;border-radius:30px;border:1px solid var(--border2);background:var(--glass2);color:var(--tp);font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:10px;backdrop-filter:blur(8px);transition:.2s}
+.sp-enter:hover{border-color:#00d4ff;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.2)}
 .sp-enter svg{width:16px;height:16px}
-.sp-progress{margin-top:18px;width:200px;height:3px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;opacity:0}
-.sp-progress>i{display:block;height:100%;width:0;background:var(--grad)}
 .sp-skip{position:absolute;top:22px;right:24px;z-index:3;background:none;border:none;color:var(--ts);font-size:13px;cursor:pointer;opacity:.7;transition:.2s;font-family:inherit}
 .sp-skip:hover{opacity:1;color:var(--tp)}
-@media (prefers-reduced-motion:reduce){.sp-engine .spin{animation:none}}
+@media (prefers-reduced-motion:reduce){.sp-frame.play .sp-scan{animation:none}.sp-scan{display:none}}
 </style>
 </head>
 <body>
@@ -175,28 +181,23 @@ td .src{color:var(--teal);font-size:11.5px}
     <div class="sp-orb sp-orb2"></div>
     <div class="sp-orb sp-orb3"></div>
     <div class="sp-grid"></div>
+    <div class="sp-scanlines"></div>
+    <div class="sp-vign"></div>
   </div>
   <div class="sp-stage">
-    <div class="sp-engine">
-      <svg id="engineSvg" viewBox="0 0 420 420" aria-hidden="true">
-        <defs>
-          <linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#00d4ff"/><stop offset=".5" stop-color="#a855f7"/><stop offset="1" stop-color="#ff6b9d"/>
-          </linearGradient>
-          <filter id="spGlow" x="-60%" y="-60%" width="220%" height="220%">
-            <feGaussianBlur stdDeviation="5" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <g class="spin" id="spRings"></g>
-      </svg>
+    <div class="sp-hud"><span>EVOLUTION LOOP // 智能涌现回环</span><span><b>GTE</b> · 通用思考引擎</span></div>
+    <div class="sp-frame" id="spFrame">
+      <span class="corner c-tl"></span><span class="corner c-tr"></span><span class="corner c-bl"></span><span class="corner c-br"></span>
+      <div class="sp-imgwrap" id="spImgwrap"></div>
+      <div class="sp-scan"></div>
     </div>
-    <div class="sp-title" id="spTitle">通用思考引擎</div>
-    <div class="sp-sub">GTE · 决策前盲点扫描</div>
-    <div class="sp-tag">结构 G = M（知识库 · AI · 反馈 · 经验）</div>
-    <div class="sp-status" id="spStatus">正在校准思维雷达…</div>
+    <div class="sp-meta">
+      <div class="sp-step" id="spStep">01 / 06</div>
+      <div class="sp-name" id="spName">微尘</div>
+      <div class="sp-cap" id="spCap"></div>
+    </div>
+    <div class="sp-track" id="spTrack"></div>
     <button class="sp-enter" id="spEnter">进入引擎 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <div class="sp-progress"><i id="spBar"></i></div>
   </div>
   <button class="sp-skip" id="spSkip">跳过 ↗</button>
 </div>
@@ -1642,46 +1643,39 @@ initKB(); initAI();
     splash.classList.add('hide'); document.body.style.overflow='';
     setTimeout(function(){ splash.style.display='none'; splash.setAttribute('aria-hidden','true'); }, 720);
   }
-  var NS='http://www.w3.org/2000/svg', cx=210, cy=210;
-  try{
-    var svg=document.getElementById('engineSvg');
-    var ringsG=document.getElementById('spRings');
-    [72,106,150].forEach(function(r){
-      var c=document.createElementNS(NS,'circle');
-      c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',r);
-      c.setAttribute('class','sp-ring'+(r===150?' sp-ring-outer':''));
-      ringsG.appendChild(c);
-    });
-    var nodes=[{a:-90,t:'任务'},{a:-30,t:'知识库'},{a:30,t:'AI'},{a:90,t:'反馈'},{a:150,t:'经验'},{a:210,t:'数据'}], R=150;
-    nodes.forEach(function(n){
-      var rad=n.a*Math.PI/180, x=cx+R*Math.cos(rad), y=cy+R*Math.sin(rad);
-      var cxp=cx+(x-cx)*0.5-(y-cy)*0.22, cyp=cy+(y-cy)*0.5+(x-cx)*0.22;
-      var p=document.createElementNS(NS,'path');
-      p.setAttribute('d','M'+cx+','+cy+' Q'+cxp.toFixed(1)+','+cyp.toFixed(1)+' '+x.toFixed(1)+','+y.toFixed(1));
-      p.setAttribute('class','sp-link'); svg.appendChild(p);
-      var nc=document.createElementNS(NS,'circle');
-      nc.setAttribute('cx',x); nc.setAttribute('cy',y); nc.setAttribute('r',21);
-      nc.setAttribute('class','sp-node'); svg.appendChild(nc);
-      var tx=document.createElementNS(NS,'text');
-      tx.setAttribute('x',x); tx.setAttribute('y',(y+4.5).toFixed(1));
-      tx.setAttribute('class','sp-nt'); tx.textContent=n.t; svg.appendChild(tx);
-    });
-    var cr=document.createElementNS(NS,'circle');
-    cr.setAttribute('cx',cx); cr.setAttribute('cy',cy); cr.setAttribute('r',40);
-    cr.setAttribute('class','sp-core-ring'); svg.appendChild(cr);
-    var co=document.createElementNS(NS,'circle');
-    co.setAttribute('cx',cx); co.setAttribute('cy',cy); co.setAttribute('r',30);
-    co.setAttribute('class','sp-core'); svg.appendChild(co);
-    var mt=document.createElementNS(NS,'text');
-    mt.setAttribute('x',cx); mt.setAttribute('y',cy+7); mt.setAttribute('class','sp-m'); mt.textContent='M'; svg.appendChild(mt);
-    var tt=document.getElementById('spTitle'), t=tt.textContent;
-    tt.textContent='';
-    t.split('').forEach(function(ch){ var s=document.createElement('span'); s.className='sp-ch'; s.textContent=ch; tt.appendChild(s); });
-  }catch(e){ dismiss(); return; }
+  var STAGES=[
+    {img:'assets/splash/dust.png', name:'微尘', cap:'一切的起点：无机物质在混沌中偶然聚合，没有意识，只有概率。'},
+    {img:'assets/splash/clover.png', name:'三叶草', cap:'生命的第一次自觉：物质里长出有机体，开始有了「活下去」的指向。'},
+    {img:'assets/splash/apeman.png', name:'猿人', cap:'意识的萌芽：工具与群体出现，祖先开始为未来做打算。'},
+    {img:'assets/splash/human.png', name:'人类', cap:'自我认知：能反观自身存在的物种——盲点，从此成为可被打捞的对象。'},
+    {img:'assets/splash/bits.png', name:'信息比特世界', cap:'思维外化：知识离开大脑，成为可计算、可复制、可重组的比特。'},
+    {img:'assets/splash/binary.png', name:'1 / 0', cap:'回归源头：一切又坍缩为最原初的 0 与 1，循环重启——结构生成结构。'}
+  ];
+  var wrap=document.getElementById('spImgwrap'), track=document.getElementById('spTrack');
+  var imgs=[], dots=[];
+  STAGES.forEach(function(s,i){
+    var im=new Image(); im.src=s.img; im.className='sp-img'+(i===0?' on':''); im.alt=s.name; wrap.appendChild(im); imgs.push(im);
+    var b=document.createElement('button'); b.className='sp-dot'+(i===0?' active':''); b.textContent=s.name; b.setAttribute('data-i',i);
+    b.addEventListener('click',function(){ go(i,true); });
+    track.appendChild(b); dots.push(b);
+  });
+  var stepEl=document.getElementById('spStep'), nameEl=document.getElementById('spName'), capEl=document.getElementById('spCap');
+  var frame=document.getElementById('spFrame');
+  var cur=0, autoIv=null;
+  function go(i,user){
+    cur=i; var s=STAGES[i];
+    imgs.forEach(function(im,k){ im.classList.toggle('on',k===i); });
+    dots.forEach(function(d,k){ d.classList.toggle('active',k===i); });
+    stepEl.textContent=('0'+(i+1)).slice(-2)+' / 0'+STAGES.length;
+    nameEl.textContent=s.name; capEl.textContent=s.cap;
+    if(user){ restartAuto(); }
+  }
+  function restartAuto(){ if(autoIv) clearInterval(autoIv); if(reduce) return; autoIv=setInterval(function(){ go((cur+1)%STAGES.length,false); }, 2600); }
+  frame.classList.add('play'); restartAuto();
   document.getElementById('spEnter').addEventListener('click',dismiss);
   document.getElementById('spSkip').addEventListener('click',dismiss);
   splash.addEventListener('click',function(e){
-    if(e.target===splash||e.target.classList.contains('sp-bg')||e.target.classList.contains('sp-grid')||e.target.classList.contains('sp-orb')) dismiss();
+    if(e.target===splash||e.target.classList.contains('sp-bg')||e.target.classList.contains('sp-grid')||e.target.classList.contains('sp-orb')||e.target.classList.contains('sp-scanlines')||e.target.classList.contains('sp-vign')) dismiss();
   });
   document.addEventListener('keydown',function(e){
     if(splash.style.display!=='none'&&(e.key==='Enter'||e.key===' '||e.key==='Escape')) dismiss();
@@ -1689,35 +1683,23 @@ initKB(); initAI();
   if(!reduce){
     splash.addEventListener('mousemove',function(e){
       var rx=(e.clientX/window.innerWidth-0.5), ry=(e.clientY/window.innerHeight-0.5);
-      var stg=document.querySelector('.sp-stage'); if(stg) stg.style.transform='translate('+(rx*-16)+'px,'+(ry*-16)+'px)';
+      var stg=document.querySelector('.sp-stage'); if(stg) stg.style.transform='translate('+(rx*-14)+'px,'+(ry*-14)+'px)';
       var o1=document.querySelector('.sp-orb1'); if(o1) o1.style.transform='translate('+(rx*30)+'px,'+(ry*30)+'px)';
       var o2=document.querySelector('.sp-orb2'); if(o2) o2.style.transform='translate('+(rx*-36)+'px,'+(ry*-36)+'px)';
       var o3=document.querySelector('.sp-orb3'); if(o3) o3.style.transform='translate('+(rx*22)+'px,'+(ry*22)+'px)';
     });
   }
-  var phrases=['正在校准思维雷达…','连接知识库接入物…','构建反射式路由 M(P)…','扫描决策盲区中…'];
-  var si=0, st=document.getElementById('spStatus');
-  var iv=setInterval(function(){ si++; if(si<phrases.length){ st.textContent=phrases[si]; } else { clearInterval(iv); st.textContent='校准完成 · 点击任意处进入'; } }, 760);
-  var bar=document.getElementById('spBar'), prog=0;
-  var pv=setInterval(function(){ prog=Math.min(100,prog+4); bar.style.width=prog+'%'; if(prog>=100) clearInterval(pv); }, 130);
   function run(){
-    if(!window.anime || !window.anime.stagger || reduce){
-      splash.querySelectorAll('.sp-ring,.sp-link,.sp-node,.sp-nt,.sp-core,.sp-core-ring,.sp-m,.sp-ch,.sp-sub,.sp-tag,.sp-status,.sp-enter,.sp-progress').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
+    if(!window.anime || reduce){
+      splash.querySelectorAll('.sp-hud,.sp-frame,.sp-step,.sp-name,.sp-cap,.sp-dot,.sp-enter').forEach(function(el){ el.style.opacity=1; });
       return;
     }
     var an=window.anime;
-    an.animate('.sp-ring',{opacity:[0,1],scale:[.82,1],duration:900,delay:an.stagger(120),ease:'outQuad'});
-    document.querySelectorAll('.sp-link').forEach(function(p,i){
-      var len; try{ len=p.getTotalLength(); }catch(e){ len=0; }
-      if(!len) return;
-      p.style.strokeDasharray=len; p.style.strokeDashoffset=len;
-      an.animate(p,{strokeDashoffset:[len,0],duration:850,delay:420+i*90,ease:'inOutSine'});
-    });
-    an.animate('.sp-node',{opacity:[0,1],scale:[0,1],duration:520,delay:an.stagger(90,{start:560}),ease:'outBack'});
-    an.animate('.sp-nt',{opacity:[0,1],duration:400,delay:an.stagger(90,{start:760}),ease:'outQuad'});
-    an.animate(['.sp-core-ring','.sp-core','.sp-m'],{opacity:[0,1],scale:[.4,1],duration:700,delay:320,ease:'outBack'});
-    an.animate('.sp-ch',{opacity:[0,1],translateY:[18,0],duration:520,delay:an.stagger(65,{start:520}),ease:'outQuad'});
-    an.animate(['.sp-sub','.sp-tag','.sp-status','.sp-enter','.sp-progress'],{opacity:[0,1],translateY:[14,0],duration:560,delay:an.stagger(80,{start:820}),ease:'outQuad'});
+    an.animate('.sp-hud',{opacity:[0,1],duration:600,ease:'outQuad'});
+    an.animate('.sp-frame',{opacity:[0,1],scale:[.9,1],duration:800,ease:'outQuad'});
+    an.animate(['.sp-step','.sp-name','.sp-cap'],{opacity:[0,1],translateY:[14,0],duration:560,delay:an.stagger(90,{start:300}),ease:'outQuad'});
+    an.animate('.sp-dot',{opacity:[0,1],scale:[.6,1],duration:480,delay:an.stagger(70,{start:520}),ease:'outBack'});
+    an.animate('.sp-enter',{opacity:[0,1],translateY:[14,0],duration:560,delay:900,ease:'outQuad'});
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
