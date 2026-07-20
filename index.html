@@ -166,7 +166,7 @@ td .src{color:var(--teal);font-size:11.5px}
   <!-- ============ 工作台 ============ -->
   <section class="page active" id="page-console">
     <h1 class="title">通用思考引擎</h1>
-    <p class="sub">一套思考路径，适配所有岗位，只是知识不同。纯规则版（不接 LLM）。加载一个岗位知识库（或粘贴你自己的 JSON），贴入任务描述，引擎按四步循环跑出：主矛盾 · 匹配度 · 决策灯 · 全溯源。</p>
+    <p class="sub">一套思考路径，适配所有岗位，只是知识不同。它不是问答机器人、也不是方案生成器——你贴入一段「想法 / 计划 / 目标」，它用知识库维度对你做<strong>第三方盲点扫描 + 矛盾解构</strong>，帮你决策前查漏。纯规则版（不接 LLM）。</p>
 
     <div class="glass">
       <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7" stroke-linecap="round"/></svg>STEP 0 · 知识库（可插拔）</div>
@@ -238,7 +238,7 @@ td .src{color:var(--teal);font-size:11.5px}
         <div class="gen-bar"><i id="genBar"></i></div>
         <div class="gen-meta"><span id="genTxt">准备中…</span><span id="genPct">0%</span></div>
       </div>
-      <div class="note">提示：路由完全由"关键词命中"驱动。你在描述里写的词，决定命中的规则——这正是要验证的部分。改几个词，看结论怎么变。</div>
+      <div class="note">提示：本工具不替你做"行 / 不行"的拍板，而是把你的想法拆成「要达成的目标 + 可能踩的矛盾」，帮你查漏。路由完全由"关键词命中"驱动——你在描述里写的词，决定命中的规则。改几个词，看结论怎么变。</div>
     </div>
   </section>
 
@@ -256,7 +256,7 @@ td .src{color:var(--teal);font-size:11.5px}
   <!-- ============ 决策看板 ============ -->
   <section class="page" id="page-board">
     <h1 class="title">决策看板 · 9 宫格</h1>
-    <p class="sub">四步循环引擎的输出。每一项都可在「路由追踪」页看到它从哪句话、命中哪条规则来的。</p>
+    <p class="sub">这是对你想法的「压力测试视图」，不是答案也不是执行方案。它把你的输入拆成四步循环，逐项打分；每一项都可在「路由追踪」页看到它从哪句话、命中哪条规则来的。</p>
     <div id="boardEmpty" class="empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>
       <div>还没有运行。请先到「工作台」贴入情况并运行调度引擎。</div>
@@ -733,6 +733,24 @@ function analyze(text,kb,aiCtx){
   const mk=(phase,no,name,mao,input,evals,output)=>out.steps.push({phase,no,name,mao,input,evals,output});
   const capTh=(kb.judge&&kb.judge.capThreshold)||3.2;
 
+  // —— 元层：识别输入类型（回答用户"我贴的是提问还是想法"的困惑）——
+  const qMark=(text.match(/？|\?/g)||[]).length;
+  const qWord=/怎么|如何|为什么|为何|是否|能否|该不该|要不要|行不行|怎么办|咋/.test(text);
+  const hasGoal=/目标|想|要|达成|提升|增加|优化|建立|做(一|个|款|套)|上线|推(出|广)|打(造|造)/.test(text);
+  let inputType, inputDesc;
+  if(qMark>=1||qWord){
+    inputType='提问 / 咨询';
+    inputDesc='你贴的是一个问题。本工具不替你直接作答，而是把你的问题拆成「要达成什么 + 可能踩哪些矛盾」，帮你把问题想透再决策。';
+  } else if(hasGoal){
+    inputType='想法 / 计划 / 目标';
+    inputDesc='你贴的是一段想法或计划。本工具不对它做"是/否可行"的拍板，而是用知识库维度扫描它最可能翻车的点、补上你没想到的视角。';
+  } else {
+    inputType='一段描述 / 素材';
+    inputDesc='你贴的是一段素材。本工具会从中抽取目标与风险，再做矛盾扫描；描述越具体，结论越准。';
+  }
+  out.inputType=inputType; out.inputDesc=inputDesc;
+
+
   // 知识层：加载知识库
   mk('知识',0,'加载知识库 · '+kb.role,'实事求是·基于真实数据',
     '读取当前知识库的规则（能力维度 / 环境类型 / 矛盾库 / 结果路径）',
@@ -1117,6 +1135,20 @@ function renderReport(R){
   const lampTxt={green:'绿灯 · 可以进入',yellow:'黄灯 · 谨慎进入',red:'红灯 · 不进入'};
   const E=esc;
   let h='';
+  // —— 元层：分析定位条（直接回答"这工具在干嘛 / 是回答还是方法"）——
+  h+='<div class="glass" style="border-left:5px solid var(--teal)">';
+  h+='<div class="kicker" style="color:var(--teal)">这份报告在说什么 · 先看这行</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:10px">';
+  h+='<div><div class="ts" style="font-size:12px;margin-bottom:5px">① 你输入的是</div>'+
+     '<div style="font-size:14.5px;color:var(--t);font-weight:700">'+E(R.inputType||'一段内容')+'</div>'+
+     '<div class="ts" style="font-size:12.5px;margin-top:6px;line-height:1.55">'+E(R.inputDesc||'')+'</div></div>';
+  h+='<div><div class="ts" style="font-size:12px;margin-bottom:5px">② 工具做的是</div>'+
+     '<div style="font-size:14.5px;color:var(--t);font-weight:700">第三方盲点扫描 + 矛盾解构</div>'+
+     '<div class="ts" style="font-size:12.5px;margin-top:6px;line-height:1.55">既不是直接回答你，也不是给你一份完整执行方案；而是用「'+E(STATE.kb?STATE.kb.role:'')+'」的维度，找出你想法里最可能漏的角度。</div></div>';
+  h+='<div><div class="ts" style="font-size:12px;margin-bottom:5px">③ 你该怎么用</div>'+
+     '<div style="font-size:14.5px;color:var(--t);font-weight:700">决策前「查漏」</div>'+
+     '<div class="ts" style="font-size:12.5px;margin-top:6px;line-height:1.55">产出主矛盾、风险视角、能力缺口，供你自行判断采纳——它不替你拍板。</div></div>';
+  h+='</div></div>';
   // 头部：决策灯 + 一句话结论
   h+='<div class="glass" style="border-left:5px solid '+lampColor[R.light]+'">';
   h+='<div class="kicker">总报告 · '+E(STATE.kb?STATE.kb.role:'')+'</div>';
@@ -1192,7 +1224,9 @@ function renderReport(R){
   document.getElementById('reportEmpty').style.display='none';
   document.getElementById('reportReal').style.display='block';
   // 存纯文本供复制
-  R._reportText='【GTE 总报告 · '+((STATE.kb||{}).role||'')+'】\n决策灯：'+lampTxt[R.light]+'\n结论：'+R.judge+
+  R._reportText='【GTE 总报告 · '+((STATE.kb||{}).role||'')+'】\n'+
+    '— 这是什么：你输入的是「'+(R.inputType||'一段内容')+'」。工具做的是"第三方盲点扫描+矛盾解构"，既不是直接回答你，也不是给你完整方案，而是决策前帮你查漏。\n'+
+    '决策灯：'+lampTxt[R.light]+'\n结论：'+R.judge+
     '\n\n目标：\n'+(R.goals.map(g=>'· '+g).join('\n')||'（无）')+
     '\n\n主矛盾：\n'+(R.principal.map(p=>'· '+p.c.name+'（'+(p.c.dyn?p.c.source:'手动矛盾')+'）').join('\n')||'（无）')+
     '\n\n匹配矩阵：\n'+R.matrix.map(m=>'· '+m.risk+' '+m.match+'% '+lampTxt[m.light]).join('\n')+
