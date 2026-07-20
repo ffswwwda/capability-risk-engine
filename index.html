@@ -1748,7 +1748,7 @@ initKB(); initAI();
   function frame(now){
     if(!lastT) lastT=now;
     var dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
-    phase += dt*(STAGES.length/cycleDur);
+    phase += dt*(STAGES.length/(cycleDur/1000));
     if(phase>=STAGES.length) phase-=STAGES.length;
     if(phase<0) phase+=STAGES.length;
     var k=Math.floor(phase)%STAGES.length;
