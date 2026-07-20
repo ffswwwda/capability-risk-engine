@@ -52,6 +52,17 @@ h1.title{font-size:26px;font-weight:600;margin:34px 0 6px;background:var(--grad)
 .sub strong{color:#fff;font-weight:700}
 .sub .hl{background:linear-gradient(120deg,#5fd9ff,#b98bff 55%,#ff9ec4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;white-space:nowrap}
 .glass{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:22px 24px;backdrop-filter:blur(8px)}
+
+/* ====== 可收起卡片 ====== */
+.glass-collapsible{overflow:hidden;transition:max-height .35s ease,padding .35s ease}
+.glass-collapsible.collapsed{max-height:52px!important;padding-bottom:0}
+.glass-collapsible .collapsible-body{overflow:hidden;transition:opacity .25s ease,transform .25s ease;margin-top:12px}
+.glass-collapsible.collapsed .collapsible-body{display:none}
+.kicker-toggle{cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none;-webkit-user-select:none}
+.kicker-toggle:hover{opacity:.9}
+.kicker-toggle .chev{width:18px;height:18px;flex-shrink:0;transition:transform .3s ease;color:var(--ts);margin-left:auto}
+.glass-collapsible.collapsed .chev{transform:rotate(-90deg)}
+.kicker-toggle span{flex:1}
 .glass+.glass{margin-top:18px}
 .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
 .kicker svg{width:15px;height:15px}
@@ -252,18 +263,21 @@ td .src{color:var(--teal);font-size:11.5px}
       </div>
       <div id="kbInfo" class="note" style="margin-top:12px"></div>
 
-      <div class="glass" style="margin-top:18px">
-        <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1" stroke-linecap="round"/></svg>连接外部洞察源</div>
+      <div class="glass glass-collapsible collapsed" style="margin-top:18px">
+        <div class="kicker kicker-toggle" onclick="toggleCollapse(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1" stroke-linecap="round"/></svg><span>连接外部洞察源</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="collapsible-body">
         <label class="lbl">从「类目用户研究室」看板站拉取工作区知识，作为可插拔知识库接入路由器。两站同源（都在 ffswwwda.github.io），部署后可直接读数据；本地打开则自动回退为手动对照。</label>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-sec" onclick="openInsightHub()">打开看板站 ↗</button>
           <button class="btn btn-primary" onclick="importInsightHub()">从看板站拉取工作区</button>
         </div>
         <div id="ciImportBox" style="margin-top:10px"></div>
+        </div>
       </div>
 
-      <div class="glass" style="margin-top:18px">
-        <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a4 4 0 00-4 4 3 3 0 00-1 5 3 3 0 002 5 4 4 0 006 0 3 3 0 002-5 3 3 0 00-1-5 4 4 0 00-4-4z" stroke-linejoin="round"/><path d="M12 3v18" stroke-linecap="round"/></svg>AI 增强（可选 · 层3 语义分支）</div>
+      <div class="glass glass-collapsible collapsed" style="margin-top:18px">
+        <div class="kicker kicker-toggle" onclick="toggleCollapse(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a4 4 0 00-4 4 3 3 0 00-1 5 3 3 0 002 5 4 4 0 006 0 3 3 0 002-5 3 3 0 00-1-5 4 4 0 00-4-4z" stroke-linejoin="round"/><path d="M12 3v18" stroke-linecap="round"/></svg><span>AI 增强（可选 · 层3 语义分支）</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="collapsible-body">
         <label class="lbl">开启后，AI 读取否定/近似语义，修正纯规则的目标-风险误判。它不新增聊天框，只让路由更准（M(AI) 接入 → 路由内部长出语义分支）。</label>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <label class="switch"><input type="checkbox" id="aiSw"><span class="slider"></span></label>
@@ -276,6 +290,7 @@ td .src{color:var(--teal);font-size:11.5px}
         <div id="aiKeyWrap" style="display:none;margin-top:12px">
           <input type="password" id="aiKey" placeholder="API Key（仅存浏览器 localStorage，绝不进仓库）">
           <div class="note" style="margin-top:8px">Key 只在你本地浏览器，引擎直连服务商。M(AI) 层只做语义校准，不替代你的知识库，也不读取你的 KB 内容上传（仅把任务描述发给模型做语义分析）。</div>
+        </div>
         </div>
       </div>
 
@@ -1662,6 +1677,13 @@ function showPage(p){
   }
   box.addEventListener('input', apply);
 })();
+
+
+function toggleCollapse(el){
+  var card=el.closest?el.closest('.glass-collapsible'):el.parentNode;
+  if(!card) return;
+  var isCollapsed=card.classList.toggle('collapsed');
+}
 
 initKB(); initAI();
 </script>
