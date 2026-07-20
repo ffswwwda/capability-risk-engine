@@ -130,9 +130,76 @@ td .src{color:var(--teal);font-size:11.5px}
   .main{margin-left:0}
   .grid9{grid-template-columns:1fr}.path-ev .ev-item{max-width:140px}
 }
+/* ===== 开屏动画 splash ===== */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:radial-gradient(1200px 700px at 78% -8%,rgba(168,85,247,.20),transparent),radial-gradient(900px 600px at 12% 12%,rgba(0,212,255,.16),transparent),#070b16}
+#splash.hide{opacity:0;filter:blur(8px);pointer-events:none;transition:opacity .7s ease,filter .7s ease}
+.sp-bg{position:absolute;inset:0;overflow:hidden}
+.sp-orb{position:absolute;border-radius:50%;filter:blur(58px);opacity:.5;mix-blend-mode:screen;will-change:transform}
+.sp-orb1{width:420px;height:420px;left:-90px;top:-70px;background:radial-gradient(circle,#00d4ff,transparent 70%)}
+.sp-orb2{width:520px;height:520px;right:-130px;bottom:-130px;background:radial-gradient(circle,#a855f7,transparent 70%)}
+.sp-orb3{width:360px;height:360px;left:50%;top:62%;background:radial-gradient(circle,#ff6b9d,transparent 70%)}
+.sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:46px 46px;-webkit-mask-image:radial-gradient(circle at 50% 44%,#000,transparent 72%);mask-image:radial-gradient(circle at 50% 44%,#000,transparent 72%);opacity:.45}
+.sp-stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;will-change:transform}
+.sp-engine{width:min(310px,70vw);aspect-ratio:1;margin-bottom:4px}
+.sp-engine svg{width:100%;height:100%;overflow:visible}
+.sp-ring{fill:none;stroke:url(#spGrad);stroke-width:1.4;stroke-dasharray:4 9;opacity:0;transform-box:fill-box;transform-origin:center}
+.sp-ring-outer{stroke-width:1}
+.sp-link{fill:none;stroke:url(#spGrad);stroke-width:1.4;opacity:0}
+.sp-node{fill:rgba(8,12,24,.9);stroke:url(#spGrad);stroke-width:1.6;opacity:0;transform-box:fill-box;transform-origin:center}
+.sp-nt{fill:#cfd6e6;font-size:13px;text-anchor:middle;font-family:var(--font);font-weight:500;opacity:0}
+.sp-core-ring{fill:none;stroke:url(#spGrad);stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center}
+.sp-core{fill:url(#spGrad);filter:url(#spGlow);opacity:0;transform-box:fill-box;transform-origin:center}
+.sp-m{fill:#fff;font-size:22px;font-weight:700;text-anchor:middle;font-family:var(--font);opacity:0;transform-box:fill-box;transform-origin:center}
+@keyframes spSpin{to{transform:rotate(360deg)}}
+.sp-engine .spin{transform-box:fill-box;transform-origin:center;animation:spSpin 38s linear infinite}
+.sp-title{font-size:clamp(28px,6vw,40px);font-weight:700;letter-spacing:.04em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-top:8px;line-height:1.1}
+.sp-ch{display:inline-block;opacity:0}
+.sp-sub{margin-top:10px;font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--ts);opacity:0}
+.sp-tag{margin-top:7px;font-size:11.5px;color:var(--ts);opacity:0;letter-spacing:.03em}
+.sp-status{margin-top:18px;font-size:13px;color:var(--teal);min-height:18px;opacity:0;font-variant-numeric:tabular-nums}
+.sp-enter{margin-top:20px;padding:13px 30px;border-radius:30px;border:1px solid var(--border2);background:var(--glass2);color:var(--tp);font-size:15px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:10px;backdrop-filter:blur(8px);transition:.2s;opacity:0}
+.sp-enter:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.18)}
+.sp-enter svg{width:16px;height:16px}
+.sp-progress{margin-top:18px;width:200px;height:3px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;opacity:0}
+.sp-progress>i{display:block;height:100%;width:0;background:var(--grad)}
+.sp-skip{position:absolute;top:22px;right:24px;z-index:3;background:none;border:none;color:var(--ts);font-size:13px;cursor:pointer;opacity:.7;transition:.2s;font-family:inherit}
+.sp-skip:hover{opacity:1;color:var(--tp)}
+@media (prefers-reduced-motion:reduce){.sp-engine .spin{animation:none}}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <div class="sp-bg">
+    <div class="sp-orb sp-orb1"></div>
+    <div class="sp-orb sp-orb2"></div>
+    <div class="sp-orb sp-orb3"></div>
+    <div class="sp-grid"></div>
+  </div>
+  <div class="sp-stage">
+    <div class="sp-engine">
+      <svg id="engineSvg" viewBox="0 0 420 420" aria-hidden="true">
+        <defs>
+          <linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#00d4ff"/><stop offset=".5" stop-color="#a855f7"/><stop offset="1" stop-color="#ff6b9d"/>
+          </linearGradient>
+          <filter id="spGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <g class="spin" id="spRings"></g>
+      </svg>
+    </div>
+    <div class="sp-title" id="spTitle">通用思考引擎</div>
+    <div class="sp-sub">GTE · 决策前盲点扫描</div>
+    <div class="sp-tag">结构 G = M（知识库 · AI · 反馈 · 经验）</div>
+    <div class="sp-status" id="spStatus">正在校准思维雷达…</div>
+    <button class="sp-enter" id="spEnter">进入引擎 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="sp-progress"><i id="spBar"></i></div>
+  </div>
+  <button class="sp-skip" id="spSkip">跳过 ↗</button>
+</div>
 <div class="app">
   <aside class="sidebar">
     <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#06121f" stroke-width="2"><path d="M12 3v18M3 12h18" stroke-linecap="round"/></svg></span>通用思考引擎</div>
@@ -485,6 +552,7 @@ td .src{color:var(--teal);font-size:11.5px}
 </main>
 </div>
 
+<script src="vendor/anime.umd.min.js"></script>
 <script>
 /* ===================== 知识库（可插拔 · 岗位无关） =====================
  * 引擎内核只认这个 Schema，不认具体岗位名。
@@ -1563,6 +1631,96 @@ function showPage(p){
 }
 
 initKB(); initAI();
+</script>
+<script>
+(function(){
+  var splash=document.getElementById('splash');
+  if(!splash) return;
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function dismiss(){
+    if(splash.classList.contains('hide')) return;
+    splash.classList.add('hide'); document.body.style.overflow='';
+    setTimeout(function(){ splash.style.display='none'; splash.setAttribute('aria-hidden','true'); }, 720);
+  }
+  var NS='http://www.w3.org/2000/svg', cx=210, cy=210;
+  try{
+    var svg=document.getElementById('engineSvg');
+    var ringsG=document.getElementById('spRings');
+    [72,106,150].forEach(function(r){
+      var c=document.createElementNS(NS,'circle');
+      c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',r);
+      c.setAttribute('class','sp-ring'+(r===150?' sp-ring-outer':''));
+      ringsG.appendChild(c);
+    });
+    var nodes=[{a:-90,t:'任务'},{a:-30,t:'知识库'},{a:30,t:'AI'},{a:90,t:'反馈'},{a:150,t:'经验'},{a:210,t:'数据'}], R=150;
+    nodes.forEach(function(n){
+      var rad=n.a*Math.PI/180, x=cx+R*Math.cos(rad), y=cy+R*Math.sin(rad);
+      var cxp=cx+(x-cx)*0.5-(y-cy)*0.22, cyp=cy+(y-cy)*0.5+(x-cx)*0.22;
+      var p=document.createElementNS(NS,'path');
+      p.setAttribute('d','M'+cx+','+cy+' Q'+cxp.toFixed(1)+','+cyp.toFixed(1)+' '+x.toFixed(1)+','+y.toFixed(1));
+      p.setAttribute('class','sp-link'); svg.appendChild(p);
+      var nc=document.createElementNS(NS,'circle');
+      nc.setAttribute('cx',x); nc.setAttribute('cy',y); nc.setAttribute('r',21);
+      nc.setAttribute('class','sp-node'); svg.appendChild(nc);
+      var tx=document.createElementNS(NS,'text');
+      tx.setAttribute('x',x); tx.setAttribute('y',(y+4.5).toFixed(1));
+      tx.setAttribute('class','sp-nt'); tx.textContent=n.t; svg.appendChild(tx);
+    });
+    var cr=document.createElementNS(NS,'circle');
+    cr.setAttribute('cx',cx); cr.setAttribute('cy',cy); cr.setAttribute('r',40);
+    cr.setAttribute('class','sp-core-ring'); svg.appendChild(cr);
+    var co=document.createElementNS(NS,'circle');
+    co.setAttribute('cx',cx); co.setAttribute('cy',cy); co.setAttribute('r',30);
+    co.setAttribute('class','sp-core'); svg.appendChild(co);
+    var mt=document.createElementNS(NS,'text');
+    mt.setAttribute('x',cx); mt.setAttribute('y',cy+7); mt.setAttribute('class','sp-m'); mt.textContent='M'; svg.appendChild(mt);
+    var tt=document.getElementById('spTitle'), t=tt.textContent;
+    tt.textContent='';
+    t.split('').forEach(function(ch){ var s=document.createElement('span'); s.className='sp-ch'; s.textContent=ch; tt.appendChild(s); });
+  }catch(e){ dismiss(); return; }
+  document.getElementById('spEnter').addEventListener('click',dismiss);
+  document.getElementById('spSkip').addEventListener('click',dismiss);
+  splash.addEventListener('click',function(e){
+    if(e.target===splash||e.target.classList.contains('sp-bg')||e.target.classList.contains('sp-grid')||e.target.classList.contains('sp-orb')) dismiss();
+  });
+  document.addEventListener('keydown',function(e){
+    if(splash.style.display!=='none'&&(e.key==='Enter'||e.key===' '||e.key==='Escape')) dismiss();
+  });
+  if(!reduce){
+    splash.addEventListener('mousemove',function(e){
+      var rx=(e.clientX/window.innerWidth-0.5), ry=(e.clientY/window.innerHeight-0.5);
+      var stg=document.querySelector('.sp-stage'); if(stg) stg.style.transform='translate('+(rx*-16)+'px,'+(ry*-16)+'px)';
+      var o1=document.querySelector('.sp-orb1'); if(o1) o1.style.transform='translate('+(rx*30)+'px,'+(ry*30)+'px)';
+      var o2=document.querySelector('.sp-orb2'); if(o2) o2.style.transform='translate('+(rx*-36)+'px,'+(ry*-36)+'px)';
+      var o3=document.querySelector('.sp-orb3'); if(o3) o3.style.transform='translate('+(rx*22)+'px,'+(ry*22)+'px)';
+    });
+  }
+  var phrases=['正在校准思维雷达…','连接知识库接入物…','构建反射式路由 M(P)…','扫描决策盲区中…'];
+  var si=0, st=document.getElementById('spStatus');
+  var iv=setInterval(function(){ si++; if(si<phrases.length){ st.textContent=phrases[si]; } else { clearInterval(iv); st.textContent='校准完成 · 点击任意处进入'; } }, 760);
+  var bar=document.getElementById('spBar'), prog=0;
+  var pv=setInterval(function(){ prog=Math.min(100,prog+4); bar.style.width=prog+'%'; if(prog>=100) clearInterval(pv); }, 130);
+  function run(){
+    if(!window.anime || !window.anime.stagger || reduce){
+      splash.querySelectorAll('.sp-ring,.sp-link,.sp-node,.sp-nt,.sp-core,.sp-core-ring,.sp-m,.sp-ch,.sp-sub,.sp-tag,.sp-status,.sp-enter,.sp-progress').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
+      return;
+    }
+    var an=window.anime;
+    an.animate('.sp-ring',{opacity:[0,1],scale:[.82,1],duration:900,delay:an.stagger(120),ease:'outQuad'});
+    document.querySelectorAll('.sp-link').forEach(function(p,i){
+      var len; try{ len=p.getTotalLength(); }catch(e){ len=0; }
+      if(!len) return;
+      p.style.strokeDasharray=len; p.style.strokeDashoffset=len;
+      an.animate(p,{strokeDashoffset:[len,0],duration:850,delay:420+i*90,ease:'inOutSine'});
+    });
+    an.animate('.sp-node',{opacity:[0,1],scale:[0,1],duration:520,delay:an.stagger(90,{start:560}),ease:'outBack'});
+    an.animate('.sp-nt',{opacity:[0,1],duration:400,delay:an.stagger(90,{start:760}),ease:'outQuad'});
+    an.animate(['.sp-core-ring','.sp-core','.sp-m'],{opacity:[0,1],scale:[.4,1],duration:700,delay:320,ease:'outBack'});
+    an.animate('.sp-ch',{opacity:[0,1],translateY:[18,0],duration:520,delay:an.stagger(65,{start:520}),ease:'outQuad'});
+    an.animate(['.sp-sub','.sp-tag','.sp-status','.sp-enter','.sp-progress'],{opacity:[0,1],translateY:[14,0],duration:560,delay:an.stagger(80,{start:820}),ease:'outQuad'});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+})();
 </script>
 </body>
 </html>
