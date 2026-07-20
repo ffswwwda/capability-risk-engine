@@ -187,6 +187,16 @@ td .src{color:var(--teal);font-size:11.5px}
       <div id="kbInfo" class="note" style="margin-top:12px"></div>
 
       <div class="glass" style="margin-top:18px">
+        <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1" stroke-linecap="round"/></svg>连接外部洞察源</div>
+        <label class="lbl">从「类目用户研究室」看板站拉取工作区知识，作为可插拔知识库接入路由器。两站同源（都在 ffswwwda.github.io），部署后可直接读数据；本地打开则自动回退为手动对照。</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-sec" onclick="openInsightHub()">打开看板站 ↗</button>
+          <button class="btn btn-primary" onclick="importInsightHub()">从看板站拉取工作区</button>
+        </div>
+        <div id="ciImportBox" style="margin-top:10px"></div>
+      </div>
+
+      <div class="glass" style="margin-top:18px">
         <div class="kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a4 4 0 00-4 4 3 3 0 00-1 5 3 3 0 002 5 4 4 0 006 0 3 3 0 002-5 3 3 0 00-1-5 4 4 0 00-4-4z" stroke-linejoin="round"/><path d="M12 3v18" stroke-linecap="round"/></svg>AI 增强（可选 · 层3 语义分支）</div>
         <label class="lbl">开启后，AI 读取否定/近似语义，修正纯规则的目标-风险误判。它不新增聊天框，只让路由更准（M(AI) 接入 → 路由内部长出语义分支）。</label>
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -1374,6 +1384,84 @@ function applyPastedKB(){
     setExtKB(kb); STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
     hint.textContent='✓ 已应用'; setTimeout(()=>hint.textContent='',2600);
   }catch(e){ hint.textContent='解析失败：'+e.message; }
+}
+
+/* ===================== 连接外部洞察源（类目用户研究室看板站） ===================== */
+const CIHUB_URL='https://ffswwwda.github.io/category-insight-hub/category-insight-hub.html';
+function openInsightHub(){ window.open(CIHUB_URL,'_blank','noopener'); }
+function importInsightHub(){
+  const box=document.getElementById('ciImportBox'); if(!box)return;
+  box.innerHTML='<div class="hint">正在从同源看板站拉取数据…（约 1–3 秒）</div>';
+  const ifr=document.createElement('iframe');
+  ifr.style.position='fixed'; ifr.style.left='-9999px'; ifr.style.width='1px'; ifr.style.height='1px'; ifr.style.border='0';
+  ifr.src=CIHUB_URL;
+  let done=false;
+  const to=setTimeout(()=>{ if(!done){ done=true; box.innerHTML='<div class="hint">⚠ 拉取超时。请确认本工具已部署在 ffswwwda.github.io（同源才能读数据）；或点「打开看板站」手动对照后粘贴 JSON。</div>'; } }, 9000);
+  ifr.onload=()=>{
+    if(done)return;
+    try{
+      const D=ifr.contentWindow.DATA;
+      if(!D||!D.workspaces) throw new Error('未在读到的页面中找到 DATA');
+      const kb=mapCIHubToKB(D);
+      done=true; clearTimeout(to);
+      showImportPreview(kb, box);
+    }catch(e){
+      done=true; clearTimeout(to);
+      box.innerHTML='<div class="hint">⚠ 拉取失败：'+esc(e.message)+'。可能以本地 file:// 打开（跨域）或看板站结构已变。可点「打开看板站」手动对照，用「粘贴 JSON」导入。</div>';
+    }finally{ setTimeout(()=>{ try{ifr.remove();}catch(_){} },500); }
+  };
+  ifr.onerror=()=>{ done=true; clearTimeout(to); box.innerHTML='<div class="hint">⚠ 加载看板站失败，请检查网络。</div>'; };
+  document.body.appendChild(ifr);
+}
+// 把看板站的 DATA 映射成 GTE 知识库：工作区→能力维度+分析视角，数据源→能力维度
+function mapCIHubToKB(D){
+  const capDims=[], contradictions=[];
+  const ws=D.workspaces||{};
+  ['insight','ops'].forEach(wk=>{
+    const w=ws[wk]; if(!w||!Array.isArray(w.purposes))return;
+    (w.purposes).forEach(p=>{
+      const srcIds=(p.sources||[]);
+      const srcNames=srcIds.map(s=>{const s2=D.sources&&D.sources[s];return s2?s2.name:s;}).filter(Boolean);
+      const key=(p.name+'|'+srcIds.join('|')).replace(/\s+/g,'');
+      capDims.push({name:p.name, key:key, baseline:3});
+      contradictions.push({
+        id:'ci_'+wk+'_'+(p.id||p.name),
+        name:p.name,
+        kw:[p.name].concat(srcIds).concat(srcNames),
+        method:p.methods||'',
+        source:'类目洞察工作区·'+wk,
+        weight:1
+      });
+    });
+  });
+  const sources=D.sources||{};
+  Object.keys(sources).forEach(sid=>{
+    const s=sources[sid]; if(!s)return;
+    capDims.push({name:s.name, key:(s.name+'|'+sid), baseline:3});
+  });
+  return {role:'类目洞察·工作区(看板站)', intro:'从 category-insight-hub 拉取', capDims:capDims, contradictions:contradictions, envTypes:[], pathSteps:[], judge:{capThreshold:3.2}};
+}
+function showImportPreview(kb, box){
+  window.__pendingKB=kb;
+  box.innerHTML=
+    '<div style="font-size:13px;color:var(--tp);margin-bottom:6px">✓ 拉取成功：'+kb.capDims.length+' 个能力维度 · '+kb.contradictions.length+' 条分析视角</div>'+
+    '<div class="ts" style="font-size:12.5px;margin-bottom:10px">已把 '+ kb.contradictions.length +' 个工作区 + '+(kb.capDims.length-kb.contradictions.length)+' 个数据源映射为能力维度，'+kb.contradictions.length+' 个工作区同时映射为分析视角（触发词含其调用的数据源名）。保存后可在上方下拉框选用。</div>'+
+    '<div style="display:flex;gap:10px">'+
+      '<button class="btn btn-primary" onclick="confirmImportKB()">保存为知识库</button>'+
+      '<button class="btn btn-sec" onclick="cancelImportKB()">取消</button>'+
+    '</div>';
+}
+function confirmImportKB(){
+  const kb=window.__pendingKB; if(!kb)return;
+  setExtKB(kb); STATE.kb=kb; addExternalOption(kb.role); refreshKBInfo();
+  const box=document.getElementById('ciImportBox');
+  if(box) box.innerHTML='<div class="hint">✓ 已保存为外部知识库「'+esc(kb.role)+'」，可在上方下拉框选择使用，也可在编辑器里微调。</div>';
+  window.__pendingKB=null;
+}
+function cancelImportKB(){
+  const box=document.getElementById('ciImportBox');
+  if(box) box.innerHTML='';
+  window.__pendingKB=null;
 }
 
 /* ===================== 运行 ===================== */
